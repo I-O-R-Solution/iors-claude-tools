@@ -10,7 +10,7 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 |---|---|
 | `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
 | `/prepare-session` | Context-Engineer. Generates a copy-ready session prompt for a topic/feature with code context, gap analysis, guardrails. Saves to `.planning/session-prompts/`. |
-| `/ende` | Session-end protocol. Reliable slash-command alternative to the `session-ende` skill — same 5 steps. Use when you want a guaranteed trigger or when the natural-language skill doesn't fire. |
+| `/ende` | Session-end protocol. Thin pointer to the `session-ende` skill (single source of truth). Use when you want a guaranteed slash-command trigger. |
 
 ### Skills
 
@@ -60,17 +60,17 @@ ln -s "$PWD/iors-claude-tools/skills/session-ende" ~/.claude/skills/
 
 Output is saved to `.planning/session-prompts/<topic-slug>-prompt.md`.
 
-### `/ende`
+### `/ende` and the `session-ende` skill
+
+The skill is the single source of truth for the protocol. The slash-command is a thin pointer to it.
 
 ```bash
-/ende                             # runs the 5-step session-end protocol
+/ende                             # explicit slash-command trigger
 ```
 
-Identical to the `session-ende` skill but as an explicit slash-command. Use when you want a guaranteed trigger.
+Or trigger via natural language: "Schluss", "Ende", "Feierabend", "Feierabend fuer heute" etc. (full trigger list in `skills/session-ende/SKILL.md`).
 
-### `session-ende` skill
-
-Triggers automatically when you say "Schluss", "Ende", "Feierabend" or similar. Runs the same 5-step session-end protocol as `/ende`. If the natural-language trigger ever fails, fall back to `/ende`.
+If the natural-language trigger ever fails to fire, fall back to `/ende`.
 
 ## Conventions
 
