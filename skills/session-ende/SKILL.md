@@ -1,73 +1,78 @@
 ---
 name: session-ende
-description: Session-Ende-Protokoll mit Memory-Check, Chronicle-Check, Distill-Check, offenen Punkten und Integritaets-Check. Triggert wenn Oliver die Session beendet — "Schluss", "Ende", "Feierabend", "das war's fuer heute", "wir hoeren auf", "ich bin raus", "machen wir Schluss", "fuer heute reicht's". NICHT triggern bei Aktions-Ende ("ende den Block", "Schluss mit dem Refactor", "beende die Funktion") — nur bei Session-Ende.
+description: Session-Ende-Protokoll. Triggert bei Schluss/Ende/Feierabend (Session-Ende, nicht Aktion-Ende).
 ---
 
 # Session-Ende-Protokoll
 
-## Wann triggert dieser Skill
+## Trigger
 
-**Triggert** wenn Oliver die aktuelle Arbeits-Session beendet:
-- "Schluss", "Ende", "Feierabend"
-- "das war's fuer heute", "fuer heute reicht's"
-- "wir hoeren auf", "wir machen Schluss"
-- "ich bin raus", "ich gehe offline"
+**JA** wenn Oliver die Arbeits-Session beendet:
+"Schluss", "Ende", "Feierabend", "das war's fuer heute", "fuer heute reicht's", "wir hoeren auf", "ich bin raus", "ich gehe offline"
 
-**Triggert NICHT** wenn das Wort sich auf eine konkrete Aktion bezieht:
-- "ende den Code-Block" → Aktion, kein Session-Ende
-- "Schluss mit dem Refactor" → Aktion-Ende
-- "beende die Funktion" → Aktion-Ende
-- "ende des Skripts" → technischer Bezug
+**NEIN** wenn das Wort sich auf eine Aktion bezieht:
+"ende den Code-Block", "Schluss mit dem Refactor", "beende die Funktion", "ende des Skripts"
 
-Im Zweifel: kurz nachfragen ("Session-Ende oder nur diese Aktion?"), nicht blind durchspulen.
+Im Zweifel: kurz nachfragen ("Session-Ende oder nur diese Aktion?").
 
-## Ablauf — 5 Schritte in dieser Reihenfolge
+## Ablauf — 5 Schritte in Reihenfolge
 
-### 1. Memory-Check
+### 1. Memory-Check (Pflicht-Output)
 
-Was wurde in dieser Session gelernt, das cross-session gespeichert werden sollte?
+Pruefe was in dieser Session gelernt wurde, das cross-session gespeichert werden sollte:
+
 - **Feedback-Patterns** (Korrekturen von Oliver)
 - **Neue Projekt-Fakten** (Status, Entscheidungen, Stakeholder)
 - **Referenzen** zu externen Systemen
 
-Routing-Regeln siehe `~/.claude/CLAUDE.md` → `## Memory`.
+Routing-Regeln: `~/.claude/CLAUDE.md` → `## Memory`.
+
+**Output (immer):**
+- Wenn Memories geschrieben → Liste der angelegten/aktualisierten Dateinamen
+- Wenn keine → ein Satz "Keine neuen Memories noetig"
 
 ### 2. Chronicle-Check
 
-Erfuellt die Session einen Chronicle-Trigger?
-- Erster Erfolg / Durchbruch
-- Pivot oder grundlegende Richtungsaenderung
-- "perfekt", "geil", "das ist es" vom User
-- "Chronicle this" (Sofort-Trigger)
-- Start eines neuen Projekts
+Erfuellt die Session einen Chronicle-Trigger? (Liste in `~/.claude/chronicle/TEMPLATE.md` → "Trigger")
 
-Wenn ja: Eintrag nach `~/.claude/chronicle/TEMPLATE.md` schreiben.
+Wenn ja:
+- Neue Datei anlegen unter `~/.claude/chronicle/YYYY-MM-DD_titel-mit-bindestrichen.md`
+- Inhalt zwischen den `<!-- KOPIER-START -->` und `<!-- KOPIER-ENDE -->` Markern aus `TEMPLATE.md` als Vorlage nehmen
+- Felder ausfuellen, niemals direkt in TEMPLATE.md schreiben
 
 ### 3. Chronicle-Distill-Check
 
-- Datum aus `~/.claude/chronicle/.last_distilled.txt` lesen
-- Anzahl Chronicle-Files mit `mtime > last_distilled` zaehlen
-- Wenn **≥10 Files** ODER **letzter Distill > 14 Tage** her:
-  → Oliver auf Distill hinweisen (NICHT eigenmaechtig ausfuehren)
-- Bei Distill-Lauf: Marker-File auf heutiges Datum aktualisieren
+- Lies Datum aus `~/.claude/chronicle/.last_distilled.txt` (ISO-Format `YYYY-MM-DD`)
+- Wenn File fehlt → behandle als "alle Files frisch", schreibe Marker mit aelteltem Chronicle-Datum
+- Zaehle Chronicle-Files mit `YYYY-MM-DD_*.md` deren Datum-Praefix > Marker-Datum
+- Wenn **≥10 Files** ODER **letzter Distill > 14 Tage** her: Oliver auf Distill hinweisen (NICHT eigenmaechtig ausfuehren)
 
-### 4. Offene Punkte
+Marker-Update passiert NACH einem manuellen Distill-Lauf, nicht hier.
 
-Kurze Zusammenfassung:
-- Was wurde erledigt?
-- Was ist offen?
-- Was ist der naechste logische Schritt?
+### 4. Offene Punkte (festes Output-Format)
+
+Liefere immer in diesem Format:
+
+```markdown
+## Heute erledigt
+- <Stichpunkt mit Datei/Pfad falls relevant>
+
+## Offen
+- [ ] <Task> (Datei/Pfad falls relevant)
+
+## Naechster Schritt
+<ein Satz>
+```
 
 ### 5. Integritaets-Check (silent-by-default)
 
-Nur in Git-Repos mit Commits von heute. Output NUR wenn auffaellig:
+Nur in Git-Repos mit Commits von heute. Output NUR wenn auffaellig.
 
 **Regressions-Check:**
-Wurde eine Datei heute erst stark gekuerzt (>50%) und spaeter wieder vergroessert?
-→ Warnung mit Hash des Kuerzungs-Commits
+Pruefe via `git log --since=midnight --name-status`:
+Datei wurde heute mit netto **<-50 Zeilen** committet UND in einem **spaeteren** Commit mit netto **>+30 Zeilen** ergaenzt → Warnung mit Hash des Kuerzungs-Commits. (Schwellwerte verhindern False-Positives bei normalen Edits.)
 
 **Parallel-Chat-Check:**
-Mehrere `session-*.md` von heute ohne entsprechenden ENDE-Commit?
-→ Warnung: "Vor naechstem Chat `git pull` + `git status` pruefen"
+Mehrere `session-*.md` Files im Workspace (Konvention: Session-Logs nach `~/.claude/projects/*/session-*.md`) von heute ohne entsprechenden ENDE-Commit → Warnung: "Vor naechstem Chat `git pull` + `git status` pruefen".
 
-**Wenn nichts auffaellig:** kein Output, keine Erwaehnung.
+Wenn nichts auffaellig: kein Output, keine Erwaehnung.
