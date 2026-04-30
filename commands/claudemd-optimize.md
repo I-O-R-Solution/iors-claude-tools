@@ -27,6 +27,15 @@ Ziel-Datei: $ARGUMENTS
 - Forward-Slashes (Bash unter Windows)
 - Datei fehlt → STOPPE: "Datei nicht gefunden: [pfad]. Gib keinen Parameter
   (= ./CLAUDE.md), 'global' oder validen Pfad an."
+- Datei-Name ist nicht `CLAUDE.md` (oder `CLAUDE.local.md`) → STOPPE: "Dieser
+  Skill reviewt nur CLAUDE.md-Files. Fuer andere Files: anderen Review-Skill nutzen."
+
+**Disambiguierung bei tiefer Verschachtelung:** Vor dem Lesen der Ziel-Datei
+einmal vom Ziel-Datei-Ordner bis Filesystem-Root walken und ALLE
+`CLAUDE.md`-Files auf dem Weg listen (Bash: `ls` pro Ebene). Wenn mehr als
+eine gefunden wird UND der User kein explizites Argument gegeben hat:
+listen, fragen *"welche reviewen?"*, dann fortfahren. Verhindert dass eine
+tieferliegende CLAUDE.md still uebersehen wird.
 
 Lies die Ziel-Datei KOMPLETT mit Read.
 
@@ -37,16 +46,21 @@ Frontmatter pruefen (falls vorhanden): `paths:` (on-demand-Loading?), `descripti
 
 ## Schritt 3: Hierarchie-Last + Strukturelle Fallen
 
-Ebenen ADDIEREN sich. Bestimme Ebene und summiere ALLE Files die wirklich always-on geladen werden:
+Ebenen ADDIEREN sich. Bestimme den vollstaendigen Always-On-Stack via **Walk-up**:
 
-- **Global**: diese + alle `~/.claude/rules/*.md` + `@`-Imports in dieser Datei (1 Ebene rekursiv)
-- **Projekt**: global-Stack + diese + `@`-Imports dieser Datei
-- **Subdir**: global-Stack + parent-Projekt-Stack + diese + `@`-Imports dieser Datei
+1. Start: Ordner der Ziel-Datei
+2. Walk up bis Filesystem-Root: jede `CLAUDE.md` auf dem Weg in den Stack
+3. Plus `~/.claude/CLAUDE.md`
+4. Plus alle Files in `~/.claude/rules/*.md` (Glob)
+5. Plus `@`-Imports jeder dieser Files (1 Ebene rekursiv)
+
+Egal wie tief die Ziel-Datei liegt (Ebene 2, 3, 4, 7) — **alle** Zwischen-CLAUDE.md zaehlen, nicht nur "Projekt-Root + Subdir". Bei einer Ziel-Datei in Ebene 4 sind also potenziell 4 hierarchische CLAUDE.md zu summieren plus Global plus Rules plus Imports.
 
 **Wichtig — Klarstellung was Claude Code automatisch laedt:**
 - `~/.claude/CLAUDE.md` und alle Files in `~/.claude/rules/*.md` werden vom Harness als "user's private global instructions" automatisch gelesen — KEIN Import-Statement noetig
+- Jede `CLAUDE.md` von cwd hoch bis Filesystem-Root wird automatisch geladen — beliebig viele Ebenen, nicht nur "eine Projekt-Datei"
 - `@path`-Imports werden zusaetzlich rekursiv aufgeloest (eine Tiefe)
-- Geschwister-Subdir-CLAUDE.md werden NICHT geladen — nur die Hierarchie cwd → parent → global
+- Geschwister-Subdir-CLAUDE.md werden NICHT geladen — nur die Hierarchie cwd → parent → ... → global
 
 Lies alle relevanten Files per Read/Glob, summiere Zeilen UND geschaetzte Instructions (Zeilen × 0.6, gerundet — Headers/Leerzeilen wiegen weniger als Regel-Bullets).
 
@@ -176,7 +190,7 @@ Wenn der User waehrend des Reviews mitteilt, dass eine konkrete Regel ignoriert 
 - **NIEMALS** Quick-Wins von "tiefgreifend" trennen — alles in "Was raus oder kuerzer muss", nach Impact sortiert.
 - **NIEMALS** Projected-Score oder 3-Satz-Zusammenfassung anhaengen.
 - **NIEMALS** mehrere Files gleichzeitig — ein Aufruf = eine Datei.
-- **IMMER** Hierarchie-Summe einrechnen — inklusive `@`-Imports (rekursiv 1 Ebene) UND `~/.claude/rules/*.md` (werden vom Harness automatisch geladen, kein Import noetig). Geschwister-Subdir-CLAUDE.md NICHT mitzaehlen.
+- **IMMER** Hierarchie-Summe via Walk-up einrechnen — JEDE `CLAUDE.md` von Ziel-Datei-Ordner bis Filesystem-Root (auch Ebene 2, 3, 4+), plus `@`-Imports (rekursiv 1 Ebene), plus `~/.claude/rules/*.md` (werden vom Harness automatisch geladen, kein Import noetig). Geschwister-Subdir-CLAUDE.md NICHT mitzaehlen.
 - **IMMER** Instructions-Schaetzung neben Zeilen ausweisen: Zeilen × 0.6 (Headers/Leerzeilen/Prosa wiegen weniger als Regel-Bullets). Studien (Jaroslawicz arxiv 2507.11538) messen Compliance vs. Instructions, nicht Zeilen.
 - **IMMER** Slot-Faktor 0.6 fuer die Slot-Schaetzung verwenden.
 - **IMMER** konkrete Zeilen/Aktionen ("-16 Zeilen, in ROADMAP.md auslagern") statt vage ("kuerzen").
