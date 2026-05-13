@@ -8,6 +8,7 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 
 | Command | Purpose |
 |---|---|
+| `/check` | Multi-dimensional code review across Stabilitaet, Nachhaltigkeit, Effektivitaet, Staerke. Mandatory reuse-grep, severity-classified findings (KRITISCH/WICHTIG/KLEIN), controlled fix-flow — auto-fix only for KLEIN after explicit `j`, never for WICHTIG/KRITISCH. |
 | `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
 | `/prepare-session` | Context-Engineer. Generates a copy-ready session prompt for a topic/feature with code context, gap analysis, guardrails. Saves to `.planning/session-prompts/`. |
 | `/ende` | Session-end protocol. Thin pointer to the `session-ende` skill (single source of truth). Use when you want a guaranteed slash-command trigger. |
@@ -26,6 +27,7 @@ Copy the files into your local Claude Code config directory:
 
 ```bash
 # Commands
+cp commands/check.md ~/.claude/commands/
 cp commands/claudemd-optimize.md ~/.claude/commands/
 cp commands/prepare-session.md ~/.claude/commands/
 cp commands/ende.md ~/.claude/commands/
@@ -40,6 +42,7 @@ Or clone the repo and symlink the directories:
 
 ```bash
 git clone https://github.com/I-O-R-Solution/iors-claude-tools.git
+ln -s "$PWD/iors-claude-tools/commands/check.md" ~/.claude/commands/
 ln -s "$PWD/iors-claude-tools/commands/claudemd-optimize.md" ~/.claude/commands/
 ln -s "$PWD/iors-claude-tools/commands/prepare-session.md" ~/.claude/commands/
 ln -s "$PWD/iors-claude-tools/commands/ende.md" ~/.claude/commands/
@@ -49,6 +52,21 @@ ln -s "$PWD/iors-claude-tools/skills/spark" ~/.claude/skills/
 ```
 
 ## Usage
+
+### `/check`
+
+Multi-dimensional code review with controlled fix-flow. Default scope is `git diff HEAD` — call it after each finished slice of work.
+
+```
+/check                            # reviews uncommitted changes (git diff HEAD)
+/check src/feature.ts             # reviews a single file
+/check src/components/            # reviews up to 20 files in a folder
+/check "auth flow"                # topic mode — greps for keywords, reviews top 8 matches
+```
+
+The four dimensions: **Stabilitaet** (error-handling, race-conditions, edge-cases, security), **Nachhaltigkeit** (naming, nesting, hidden coupling), **Effektivitaet** (does it achieve its goal, root-cause vs symptom), **Staerke** (mandatory reuse-grep — duplication check).
+
+Findings are classified KRITISCH / WICHTIG / KLEIN. After the report, the command asks once whether to auto-fix the KLEIN ones (`j` to confirm). WICHTIG and KRITISCH are discussed one by one, never auto-fixed.
 
 ### `/claudemd-optimize`
 
