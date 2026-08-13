@@ -8,8 +8,9 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 
 | Command | Purpose |
 |---|---|
+| `/einrichtung` | Onboarding for beginners: builds a personal **global** `~/.claude/CLAUDE.md` through a 4-question interview (language/tone, role, hard no-gos, working style). Max 20 lines output, never overwrites an existing file, ends with the `/context` verification step. |
 | `/check` | Multi-dimensional code review across Stabilitaet, Nachhaltigkeit, Effektivitaet, Staerke. Mandatory reuse-grep, severity-classified findings (KRITISCH/WICHTIG/KLEIN), controlled fix-flow — auto-fix only for KLEIN after explicit `j`, never for WICHTIG/KRITISCH. |
-| `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
+| `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Works on both levels: `global` argument reviews `~/.claude/CLAUDE.md`, a path argument reviews a project file. Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
 | `/prepare-session` | Context-Engineer. Generates a copy-ready session prompt for a topic/feature with code context, gap analysis, guardrails. Saves to `.planning/session-prompts/`. |
 | `/ende` | Session-end protocol. Thin pointer to the `session-ende` skill (single source of truth). Use when you want a guaranteed slash-command trigger. |
 | `/spark` | Quality-First project bootstrap. Slash-trigger for the `spark` skill — pre-fills Phase 0 from any text passed after the command (project name, migration hint, or rich description). |
@@ -21,12 +22,56 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 | `session-ende` | "Schluss" / "Ende" / "Feierabend" | Session-end protocol: memory check, chronicle check, distill check, open items, integrity check. |
 | `spark` | "neues Projekt" / "scaffold" / "bootstrap" / "Grundgeruest" / "kick off" | Quality-First project bootstrap. Adaptive input (rich description OR 3-question fallback), Excellence-Anchor (3 sharpening questions), Craft-Principles as Decision-000 ADR, mandatory trio (CLAUDE.md/CONTEXT.md/REFERENCES.md) plus README/.gitignore/decisions/, conditional code-tooling skeleton (Python/Node-TS/Rust/Go), idempotent re-runs, auto-review via `/claudemd-optimize`. |
 
-## Installation
+## Installation fuer Einsteiger (Windows, PowerShell)
+
+Der Weg fuer Coaching-Teilnehmer und neue Teammitglieder. Voraussetzung: Git ist
+installiert (unter Windows: [Git for Windows](https://git-scm.com/downloads/win)).
+Alle Befehle in ein **PowerShell**-Terminal (Zeile beginnt mit `PS C:\`):
+
+```powershell
+# 1. Repo holen
+git clone https://github.com/I-O-R-Solution/iors-claude-tools.git
+cd iors-claude-tools
+
+# 2. Zielordner sicherstellen
+New-Item -ItemType Directory -Force "$HOME\.claude\commands", "$HOME\.claude\skills" | Out-Null
+
+# 3. Starter-Paket kopieren
+Copy-Item commands\einrichtung.md        "$HOME\.claude\commands\"
+Copy-Item commands\spark.md              "$HOME\.claude\commands\"
+Copy-Item commands\prepare-session.md    "$HOME\.claude\commands\"
+Copy-Item commands\claudemd-optimize.md  "$HOME\.claude\commands\"
+Copy-Item -Recurse -Force skills\spark   "$HOME\.claude\skills\"
+```
+
+Danach Claude Code neu starten und mit `/einrichtung` beginnen.
+
+**Das Starter-Paket in Kurzform:**
+
+| Reihenfolge | Werkzeug | Wofuer |
+|---|---|---|
+| 1 | `/einrichtung` | die eigene globale `CLAUDE.md` — wer du bist, wie Claude antworten soll |
+| 2 | `/spark` | pro Projekt einen Ordner mit eigener Instruktionsdatei anlegen |
+| 3 | `/prepare-session` | laufende Arbeit an eine frische Session uebergeben |
+| 4 | `/claudemd-optimize` | beide Dateisorten pruefen — wird von `spark` automatisch mitbenutzt (deshalb Pflicht) |
+
+**Empfohlene Ergaenzung — Gedaechtnis:** [claude-mem](https://github.com/thedotmack/claude-mem)
+(Community-Projekt, nicht von Anthropic). Braucht Node.js 20+ (`nodejs.org`, LTS):
+
+```powershell
+npx claude-mem install
+```
+
+Danach Claude Code neu starten. Hinweis: `npm install -g claude-mem` reicht laut
+Projekt-Doku nicht — es registriert die Hooks nicht.
+
+## Installation (macOS/Linux, bash)
 
 Copy the files into your local Claude Code config directory:
 
 ```bash
 # Commands
+cp commands/einrichtung.md ~/.claude/commands/
 cp commands/check.md ~/.claude/commands/
 cp commands/claudemd-optimize.md ~/.claude/commands/
 cp commands/prepare-session.md ~/.claude/commands/
@@ -35,7 +80,7 @@ cp commands/spark.md ~/.claude/commands/
 
 # Skills
 cp -r skills/session-ende ~/.claude/skills/
-cp -r skills/spark ~/.claude/skills/   # includes references/ subfolder
+cp -r skills/spark ~/.claude/skills/   # includes references/ and scripts/ subfolders
 ```
 
 Or clone the repo and symlink the directories:
@@ -52,6 +97,19 @@ ln -s "$PWD/iors-claude-tools/skills/spark" ~/.claude/skills/
 ```
 
 ## Usage
+
+### `/einrichtung`
+
+Builds your personal global `~/.claude/CLAUDE.md` — the file Claude Code loads in
+**every** session, regardless of project. Four questions, max 20 lines of output.
+
+```
+/einrichtung                      # interview → global CLAUDE.md → /context check
+```
+
+Division of labour: `/einrichtung` describes the **person** (language, role, hard
+no-gos), `/spark` describes the **project** (house rules, workflows, structure).
+Never put project rules into the global file.
 
 ### `/check`
 
