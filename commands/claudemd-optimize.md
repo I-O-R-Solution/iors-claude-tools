@@ -1,5 +1,6 @@
 ---
 description: Review einer CLAUDE.md — kompakter Befund mit konkreten Aktionen, max 80 Zeilen Output
+argument-hint: [pfad|global]
 ---
 
 Du bist ein CLAUDE.md Optimierungs-Experte. Dein Job: Eine einzelne CLAUDE.md
@@ -27,8 +28,10 @@ Ziel-Datei: $ARGUMENTS
 - Forward-Slashes (Bash unter Windows)
 - Datei fehlt → STOPPE: "Datei nicht gefunden: [pfad]. Gib keinen Parameter
   (= ./CLAUDE.md), 'global' oder validen Pfad an."
-- Datei-Name ist nicht `CLAUDE.md` (oder `CLAUDE.local.md`) → STOPPE: "Dieser
-  Skill reviewt nur CLAUDE.md-Files. Fuer andere Files: anderen Review-Skill nutzen."
+- Datei-Name ist nicht `CLAUDE.md`, `CLAUDE.local.md` oder `AGENTS.md` →
+  STOPPE: "Dieser Skill reviewt nur CLAUDE.md-/AGENTS.md-Files. Fuer andere
+  Files: /prompt-audit nutzen." (AGENTS.md ist der spark-Standard: Substanz
+  dort, CLAUDE.md daneben ist nur der 1-Zeilen-Pointer `@AGENTS.md`.)
 
 **Disambiguierung bei tiefer Verschachtelung:** Vor dem Lesen der Ziel-Datei
 einmal vom Ziel-Datei-Ordner bis Filesystem-Root walken und ALLE
@@ -41,6 +44,9 @@ Lies die Ziel-Datei KOMPLETT mit Read.
 
 ## Schritt 2: Metriken
 
+**Schritt 2-5 sind SILENT** — der erste Output ist der Report in Schritt 6.
+Aus Schritt 1 sind nur STOPPE-Meldung und Disambiguierungs-Frage erlaubt.
+
 Per Bash (`wc -l`) oder Lesen: Zeilen, Bullets, Sections.
 Frontmatter pruefen (falls vorhanden): `paths:` (on-demand-Loading?), `description:` (pruegnant?).
 
@@ -49,22 +55,19 @@ Frontmatter pruefen (falls vorhanden): `paths:` (on-demand-Loading?), `descripti
 Ebenen ADDIEREN sich. Bestimme den vollstaendigen Always-On-Stack via **Walk-up**:
 
 1. Start: Ordner der Ziel-Datei
-2. Walk up bis Filesystem-Root: jede `CLAUDE.md` auf dem Weg in den Stack
-3. Plus `~/.claude/CLAUDE.md`
-4. Plus alle Files in `~/.claude/rules/*.md` (Glob)
-5. Plus `@`-Imports jeder dieser Files (1 Ebene rekursiv)
-
-Egal wie tief die Ziel-Datei liegt (Ebene 2, 3, 4, 7) — **alle** Zwischen-CLAUDE.md zaehlen, nicht nur "Projekt-Root + Subdir". Bei einer Ziel-Datei in Ebene 4 sind also potenziell 4 hierarchische CLAUDE.md zu summieren plus Global plus Rules plus Imports.
-
-**Wichtig — Klarstellung was Claude Code automatisch laedt:**
-- `~/.claude/CLAUDE.md` und alle Files in `~/.claude/rules/*.md` werden vom Harness als "user's private global instructions" automatisch gelesen — KEIN Import-Statement noetig
-- Jede `CLAUDE.md` von cwd hoch bis Filesystem-Root wird automatisch geladen — beliebig viele Ebenen, nicht nur "eine Projekt-Datei"
-- `@path`-Imports werden zusaetzlich rekursiv aufgeloest (eine Tiefe)
-- Geschwister-Subdir-CLAUDE.md werden NICHT geladen — nur die Hierarchie cwd → parent → ... → global
+2. Walk up bis Filesystem-Root: jede `CLAUDE.md` auf dem Weg in den Stack —
+   egal wie tief die Ziel-Datei liegt (Ebene 2, 3, 4, 7), **alle** Zwischen-CLAUDE.md zaehlen.
+   **Dedup-Regel:** Eine Pointer-CLAUDE.md (Inhalt = nur `@AGENTS.md` o. ae.
+   Import) zaehlt als ihr Import-Ziel, nicht zusaetzlich — sonst werden
+   dieselben Zeilen doppelt ins Budget gerechnet
+3. Plus `~/.claude/CLAUDE.md` und alle Files in `~/.claude/rules/*.md` (Glob) —
+   laedt der Harness automatisch, KEIN Import-Statement noetig
+4. Plus `@path`-Imports jeder dieser Files (rekursiv, eine Tiefe)
+5. Geschwister-Subdir-CLAUDE.md zaehlen NICHT — nur die Hierarchie Ziel → parent → ... → global
 
 Lies alle relevanten Files per Read/Glob, summiere Zeilen UND geschaetzte Instructions (Zeilen × 0.6, gerundet — Headers/Leerzeilen wiegen weniger als Regel-Bullets).
 
-**Accuracy-Zonen** — primaer auf Instructions (= Zeilen × 0.6) bewerten, Zeilen nur als Sekundaer-Indikator.
+**Accuracy-Zonen** — primaer auf Instructions bewerten, Zeilen nur als Sekundaer-Indikator.
 
 <!-- Quellen: Anthropic Docs (code.claude.com/docs/en/memory, /best-practices, /context-window) + Jaroslawicz et al. arxiv 2507.11538 (Juli 2025, Compliance vs. Instruction-Count gemessen) + Lakshminp-Benchmark April 2026 + Stulberg April 2026. Zeilen-Spalte ist Faustregel via Faktor 0.6. -->
 
@@ -77,8 +80,8 @@ Lies alle relevanten Files per Read/Glob, summiere Zeilen UND geschaetzte Instru
 | 300+ | 500+ | ~30-50% | kontraproduktiv (leere Datei waere besser) |
 
 **Slot-Budget:** ~50 Slots belegt System-Prompt, ~100 Slots fuer eigene
-Anweisungen verfuegbar. **Slot-Faktor 0.6 pro Zeile** (nicht jede Zeile ist
-eine Regel — Headers/Leerzeilen/Prosa wiegen weniger). Warnen bei >100, kritisch >150.
+Anweisungen verfuegbar. Slots = Instructions-Schaetzung (derselbe Faktor 0.6).
+Warnen bei >100, kritisch >150.
 
 **Anthropic-Original-Schranke:** *"target under 200 lines per CLAUDE.md file"*
 gilt **pro File**, nicht fuer die Summe. Single-File-Zone und Hierarchie-Zone
@@ -87,8 +90,13 @@ getrennt bewerten.
 **Strukturelle Fallen explizit pruefen:**
 
 - **Subdir-CLAUDE.md + /compact-Falle:** Wenn Ziel-Datei eine Subdir-CLAUDE.md ist und wichtige Regeln enthaelt → flaggen: *"`/compact` re-injected nur die Root-CLAUDE.md, nicht Subdir-Files. Wichtige Regeln gehoeren ins Root oder per `@`-Import eingebunden."*
-- **`@`-Import-Aufloesung:** `@path`-Imports werden vom **Workspace-Root** aufgeloest, nicht relativ zur CLAUDE.md. In Subdir-Files sind `@docs/x.md`-Pointer oft kaputt — Loesung: Markdown-Links `[text](relativer/pfad)` fuer projekt-lokal, `@` nur fuer Root-relative oder globale Pfade.
-- **Files in `~/.claude/rules/` werden vom Harness simpel via Glob geladen** — `paths:`-Frontmatter ist ein Skill-Mechanismus und wird hier NICHT ausgewertet. Heisst: jede Zeile in `rules/*.md` zaehlt voll zum Always-On-Budget. Loesungen: Inhalt in einen Skill auslagern (on-demand), in einen Hook (deterministisch), oder File schlanker machen.
+- **`@`-Import kostet vollen Kontext, spart keinen:** Importierte Files werden beim Launch expandiert und vollstaendig ins Fenster geladen. Aufteilen schafft Ordnung, KEIN Budget. Wer Kontext sparen will, braucht `paths:`-Rules (on-demand), Skills (on-demand) oder Markdown-Links (laden gar nicht). Max Import-Tiefe: 4 Hops. Imports in Backticks werden nicht aufgeloest.
+  <!-- Beleg: memory.md#import-additional-files — "Imported files are expanded and loaded into context at launch"; memory.md#my-claude-md-is-too-large — "Splitting into @path imports helps organization but doesn't reduce context". -->
+- **`@`-Pfad-Aufloesung:** Relative `@path`-Imports loesen **relativ zur importierenden Datei** auf, nicht zum Workspace-Root. Absolute Pfade und `~/`-Pfade sind erlaubt. Ein Import, dessen Pfad ausserhalb des Working Directory landet (z.B. `@~/.claude/x.md` in einer Projekt-CLAUDE.md), ist ein *external import*: beim ersten Auftreten zeigt Claude Code einen Approval-Dialog; wird er abgelehnt, bleiben die Imports dauerhaft aus. Bei User-Scope-Files (`~/.claude/CLAUDE.md`, `~/.claude/rules/`) entfaellt der Dialog.
+  <!-- Beleg: memory.md#import-additional-files. Korrigiert 2026-08-13 — vorher stand hier faelschlich "Imports werden vom Workspace-Root aufgeloest". -->
+- **`.claude/rules/` — der dokumentierte Entlastungs-Mechanismus:** Rules OHNE `paths`-Frontmatter laden unconditional beim Launch (gleiche Prioritaet wie `.claude/CLAUDE.md`) und zaehlen voll zum Always-On-Budget. Rules MIT `paths:`-Frontmatter laden nur, wenn Claude eine matchende Datei liest — das ist laut Doku der offizielle Weg, Instruktionen aus dem Always-On-Budget zu nehmen, ohne sie zu verlieren. User-Level-Rules unter `~/.claude/rules/` gelten fuer alle Projekte und laden VOR den Projekt-Rules (Projekt gewinnt bei Konflikt).
+  <!-- Beleg: memory.md#organize-rules-with-claude/rules/ + #path-specific-rules + #user-level-rules. Korrigiert 2026-08-13 — vorher stand hier, paths: werde in ~/.claude/rules/ nicht ausgewertet; das steht so nicht in der Doku. -->
+- **Nicht behaupten — messen:** Welche Files in einer Session TATSAECHLICH geladen sind, zeigt `/context` unter **Memory files**. Fuer die Frage *wann und warum* ein File laedt (Debugging von `paths:`-Rules und Lazy-Loading in Subdirs) gibt es den `InstructionsLoaded`-Hook. Widerspricht eine Beobachtung diesem Abschnitt: erst messen, dann diesen Command korrigieren — die Doku ist Primaerquelle, dieser Text ist Sekundaerquelle.
 
 ## Schritt 4: Bewertung gegen die 9 Prinzipien
 
@@ -103,7 +111,7 @@ getrennt bewerten.
 
 **Prinzip 4 — Formulierung:** Negativ-Form ("DO NOT X" > "do Y"); Trigger-Action ("When X, do Y"); Emphasis (IMPORTANT/YOU MUST/NEVER) fuer Kritisches — *aber nur fuer 2-3 Regeln, sonst Inflation*; konkret + ueberpruefbar ("2 Spaces" > "schoen formatieren"); `@file`-Pointer/Markdown-Links statt Kopien; Markdown-Bullets statt Prosa.
 
-**Prinzip 5 — Hierarchie:** Ebenen addieren, nicht ersetzen. Spezifischer schlaegt allgemeiner: Projekt > Global, `.local.md` > `.md`. `~/.claude/rules/*.md` zaehlt zum Budget. `paths:`-Frontmatter spart Always-On-Last.
+**Prinzip 5 — Hierarchie:** Ebenen addieren, nicht ersetzen — alle gefundenen Files werden konkateniert, von Filesystem-Root abwaerts zum cwd; naeher am cwd wird zuletzt gelesen, `CLAUDE.local.md` nach `CLAUDE.md` derselben Ebene. Spezifischer schlaegt allgemeiner: Projekt > Global, `.local.md` > `.md`. Rules ohne `paths:` zaehlen voll zum Budget; Rules mit `paths:` nur beim Match (siehe Schritt 3). Entlastungswege in dieser Reihenfolge pruefen: `paths:`-Rule → Skill → Hook (Prinzip 7). In Monorepos koennen fremde Ancestor-CLAUDE.md per `claudeMdExcludes` (Glob, in `.claude/settings.local.json`) ausgeschlossen werden; Managed-Policy-Files sind davon ausgenommen.
 
 **Prinzip 6 — "may-or-may-not"-Problem:** Inhalt kommt als User-Message mit explizitem Hinweis *"may or may not be relevant — should not respond unless highly relevant"*. Anthropic-Framing erlaubt Claude explizit ignorieren. Je laenger, desto mehr wird ignoriert.
 
@@ -136,9 +144,11 @@ getrennt bewerten.
 
 - **Volatile/persoenliche Inhalte** (Tagesgeschaeft, Experimente, persoenliche Preferences die nicht ins Team-Repo gehoeren) → **`./CLAUDE.local.md`** vorschlagen (wird zuletzt geladen, gewinnt bei Konflikt, nicht im Git)
 - **Maintainer-Notes / Versions-Logs / TODOs an dich selbst** → in **HTML-Block-Kommentare** umbauen (`<!-- ... -->`). Anthropic Docs: *"Block-level HTML comments are stripped before injection"* — kosten 0 Tokens. Statt Loeschen: konstruktiv umbauen.
-- **Lange Dokumentation (Architektur, Glossar, Datenmodell)** → in `@docs/X.md` auslagern, per Pointer einbinden (Achtung @-Import-Falle bei Subdir-Files, siehe Schritt 3)
+- **Lange Dokumentation (Architektur, Glossar, Datenmodell)** → auslagern nach `docs/X.md` und als **Markdown-Link** `[Architektur](docs/architektur.md)` einbinden, NICHT als `@`-Import. Ein `@`-Import laedt die Datei beim Launch vollstaendig mit und spart null Budget (Schritt 3); ein Markdown-Link laedt erst, wenn Claude ihn liest. Diese Unterscheidung ist der haeufigste Denkfehler in gewachsenen CLAUDE.md-Setups — explizit ansprechen, wenn du `@docs/`-Pointer findest, die als Sparmassnahme gemeint waren.
+- **Instruktionen, die nur fuer einen Teil des Repos gelten** (Frontend-Konventionen, API-Regeln, Test-Vorgaben) → in `.claude/rules/<thema>.md` mit `paths:`-Frontmatter. Laedt nur beim Match, bleibt trotzdem verbindlich. Das ist die einzige Massnahme, die Budget spart, ohne Verbindlichkeit zu verlieren.
 - **Wiederkehrende Workflows mit mehreren Schritten** → in einen Skill auslagern
 - **Zero-Tolerance-Regeln** → in einen Hook auslagern (Prinzip 7)
+- **Bei eingecheckten Projekt-Files zusaetzlich:** `/doctor` schlaegt eigenstaendig Trims vor (schneidet Directory-Layouts, Dependency-Listen und Architektur-Uebersichten weg, behaelt Pitfalls, Rationale und Abweichungen von Defaults) — als Zweitmeinung erwaehnen, nicht als Ersatz fuer diesen Review. Ab Claude Code v2.1.206.
 
 Wenn nichts fehlt: explizit "kein Gap" sagen — nichts erfinden.
 
@@ -173,6 +183,19 @@ Sag "Setze Empfehlung um" oder "Setze Punkt N um".
 Bei mehreren Aenderungen: nach Edits ggf. `/clear` damit neue CLAUDE.md geladen wird.
 ```
 
+## Schritt 7: Fix (nur nach Freigabe)
+
+Erst wenn der User "Setze Punkt N um" oder "Setze Empfehlung um" sagt:
+
+1. Vorab einmal: `git status --porcelain -- <ziel>` — hat die Ziel-Datei schon
+   uncommitted Aenderungen, EINE Warnzeile ("git diff mischt jetzt alte und
+   neue Aenderungen"). Ist die Datei gar nicht git-getrackt: warnen, dass es
+   kein Rollback gibt, und auf Bestaetigung warten.
+2. Ein Punkt = ein Edit. Danach eine Zeile: `fixed: <ziel>:<zeile> — <was>`.
+3. Bei mehr als 3 Punkten in einem Rutsch: TodoWrite-Liste, pro Fix abhaken.
+4. Danach einmal (nie pro Edit) Commit anbieten — Format nach git-workflow-Skill.
+   NIEMALS ungefragt committen.
+
 ## Optionaler Anhang — Diagnose-Trick (nur wenn der User berichtet "Claude haelt sich nicht dran")
 
 Wenn der User waehrend des Reviews mitteilt, dass eine konkrete Regel ignoriert wird:
@@ -186,13 +209,13 @@ Wenn der User waehrend des Reviews mitteilt, dass eine konkrete Regel ignoriert 
 ## Wichtige Regeln fuer dich (den Reviewer)
 
 - **NIEMALS** Probleme erfinden wenn die Datei gut ist. Score 5/5 + "kein Vorschlag" ist valide.
+- **NIEMALS** die Ziel-Datei editieren ohne explizite Freigabe ("Setze Punkt N um" / "Setze Empfehlung um").
 - **NIEMALS** Section-by-Section-Liste produzieren — zu lang.
 - **NIEMALS** Quick-Wins von "tiefgreifend" trennen — alles in "Was raus oder kuerzer muss", nach Impact sortiert.
 - **NIEMALS** Projected-Score oder 3-Satz-Zusammenfassung anhaengen.
 - **NIEMALS** mehrere Files gleichzeitig — ein Aufruf = eine Datei.
-- **IMMER** Hierarchie-Summe via Walk-up einrechnen — JEDE `CLAUDE.md` von Ziel-Datei-Ordner bis Filesystem-Root (auch Ebene 2, 3, 4+), plus `@`-Imports (rekursiv 1 Ebene), plus `~/.claude/rules/*.md` (werden vom Harness automatisch geladen, kein Import noetig). Geschwister-Subdir-CLAUDE.md NICHT mitzaehlen.
-- **IMMER** Instructions-Schaetzung neben Zeilen ausweisen: Zeilen × 0.6 (Headers/Leerzeilen/Prosa wiegen weniger als Regel-Bullets). Studien (Jaroslawicz arxiv 2507.11538) messen Compliance vs. Instructions, nicht Zeilen.
-- **IMMER** Slot-Faktor 0.6 fuer die Slot-Schaetzung verwenden.
+- **IMMER** Hierarchie-Summe via Walk-up einrechnen (Definition in Schritt 3).
+- **IMMER** Instructions- und Slot-Schaetzung neben Zeilen ausweisen (Faktor 0.6, Definition in Schritt 3) — Studien messen Compliance vs. Instructions, nicht Zeilen.
 - **IMMER** konkrete Zeilen/Aktionen ("-16 Zeilen, in ROADMAP.md auslagern") statt vage ("kuerzen").
 - **IMMER** Prinzip-Nummer beim Begruenden nennen.
 - **IMMER** Golden-Rule-Test (Prinzip 9) als primaeres Kuerz-Kriterium anwenden — nicht eigene Heuristiken erfinden.

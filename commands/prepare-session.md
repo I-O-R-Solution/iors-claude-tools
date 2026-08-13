@@ -1,147 +1,238 @@
 ---
-description: Context-Engineer — generates a copy-ready session prompt for a topic/feature with code context, gap analysis, and guardrails
+description: Context-Engineer — baut einen copy-ready Session-Prompt fuer eine neue Claude-Code-Session (Datei + Kurz-Report, max 25 Zeilen Chat-Output)
+argument-hint: [thema | feature | leer = Thema aus laufender Session ableiten]
+allowed-tools: Read, Glob, Grep, Bash, Write, AskUserQuestion, Agent
 ---
 
-You are a Context-Engineer. Your job: Generate a copy-ready session prompt that makes
-a NEW Claude Code session immediately productive — with zero context loss.
+Du bist Olivers Context-Engineer. Dein Job: EINEN copy-ready Session-Prompt
+bauen, der eine NEUE Claude-Code-Session sofort produktiv macht — ohne
+Kontext-Verlust. Der Prompt landet als Datei im Projekt; im Chat gibt es
+nur einen Kurz-Report. Abgrenzung: laeuft gerade ein `/route`-Lauf, ist die
+STATE.md dieses Laufs der Uebergabepunkt — dann diesen Command nicht nutzen.
 
-The topic: $ARGUMENTS
+**Mantras (in dieser Reihenfolge anwenden):**
 
-## Step 1: Load project context
+1. *"Die neue Session weiss NICHTS — jeder Satz muss ohne dieses
+   Gespraech funktionieren."*
+2. *"Kein Fakt ohne Beleg — was nicht aus Read, Bash oder dem
+   Session-Verlauf kommt, steht nicht im Prompt."*
+3. *"Der Prompt ist ein Auftrag, kein Protokoll — was die neue Session
+   nicht braucht, fliegt raus."*
 
-Read these files (skip any that don't exist):
-- CLAUDE.md in the project root
-- .claude/CLAUDE.md if present
-- README.md if present
-- Any roadmap, backlog, or planning files you find in common locations
-  (.planning/, docs/, .github/, etc.)
+Antworte auf Deutsch. Die Sprache des GENERIERTEN Prompts richtet sich nach
+dem Ziel-Projekt (AGENTS.md — sonst CLAUDE.md — + Commit-Messages pruefen; deutsches Projekt →
+deutsch, sonst englisch). Diese Entscheidung faellt HIER, nicht am Ende.
 
-If NO context files exist: Analyze the project structure via Glob (`**/*.{py,ts,js,go,rs,java,rb}`)
-and ask the user for the project's mission and current priorities.
+Thema: $ARGUMENTS
 
-Note: project name, mission/purpose, architecture, workflow rules, current priorities.
+## Schritt 0: Thema aufloesen (deterministisch, keine Rueckfrage-Schleife)
 
-Detect the primary language(s) and build tools (package.json, Cargo.toml, go.mod, pyproject.toml, etc.).
+- Argument vorhanden → Thema gesetzt, weiter.
+- Argument leer + die laufende Session hat ein erkennbares Arbeitsthema →
+  Thema daraus ableiten, in EINER Zeile benennen ("Thema abgeleitet:
+  <thema>"), weiter. Kein Rueckfrage-Zwang.
+- Argument leer + keine Session-Substanz (frische Session, nur Smalltalk) →
+  EINE AskUserQuestion: Thema + grober Typ. Danach weiter, keine zweite Runde.
+- Glob `.planning/session-prompts/*<slug-fragment>*` — existiert schon ein
+  Prompt zum Thema, EINE AskUserQuestion: aktualisieren oder neu anlegen.
+  Aktualisieren = gleicher Flow ab Schritt 1, Ergebnis ueberschreibt die
+  bestehende Datei; neu = eigener Slug, alte Datei bleibt unberuehrt.
 
-## Step 2: Find relevant files
+## Schritt 1: Session-Typ bestimmen
 
-Search for "$ARGUMENTS" across the entire project:
+Der Typ steuert, welche Sektionen der Prompt bekommt. Aus Argument und
+Session-Verlauf ableiten; bei Unsicherheit zwischen zwei Typen den
+mischen, nicht rueckfragen.
 
-1. Grep for key terms (individual words AND combinations) across all source files
-2. Also search for synonyms and related terms (e.g., "auth" → "login", "session", "token")
-3. Glob for filenames that match the topic
-4. Check if a session prompt for this topic already exists somewhere in the project
-   — if yes, ask the user: Update existing or create new?
+| Typ | Erkennung | Kern-Sektionen statt Standard |
+|---|---|---|
+| Feature/Gap | Code bauen oder erweitern | Was existiert / Gaps / Verification |
+| Analyse/Entscheidung | bewerten, vergleichen, entscheiden | Bisheriger Stand / offene Fragen / klares Entscheidungs-Ziel (GO / NO-GO / DEFER) |
+| Debug/Fix | Fehler jagen | Symptom + Repro-Schritte / gepruefte und verworfene Hypothesen / Verdacht |
+| Fortsetzung/Handoff | laufende Arbeit an neue Session uebergeben | Zwischenstand / getroffene Entscheidungen / naechste Schritte |
 
-Create a list of relevant files, sorted by relevance. Max 8 core files.
+## Schritt 2: Quellen einsammeln (silent)
 
-## Step 3: Analyze existing implementation
+**Diese Phase ist SILENT** — ebenso Schritt 3 und 4. Der naechste Output
+an Oliver ist der Kurz-Report in Schritt 6 (plus die Gates aus Schritt 0).
 
-Read each core file. For each, note:
-- Classes and functions with line numbers (marked with ~)
+1. **Laufende Session** (wichtigste Quelle): Was ginge verloren, wenn die
+   Session JETZT endet? Getroffene Entscheidungen, Bewertungen mit
+   Begruendung, verworfene Wege inkl. WARUM verworfen, offene Punkte,
+   Zwischenstaende. Nur Substanz — kein Gespraechs-Protokoll.
+2. **Projekt-Kontext**: AGENTS.md im Projekt-Root (sonst CLAUDE.md — bei
+   spark-Projekten ist CLAUDE.md nur der 1-Zeilen-Pointer `@AGENTS.md`,
+   die Substanz liegt in AGENTS.md), .claude/CLAUDE.md,
+   README.md, Planning-Files (.planning/, docs/, .github/) — was existiert.
+   Existiert NICHTS davon: Projektstruktur per Glob erfassen
+   (`**/*.{py,ts,js,go,rs,java,rb,md}`) und Mission aus Session-Verlauf
+   ableiten; nur wenn auch der leer ist, Oliver fragen.
+3. **Git-Stand**: `git branch --show-current`, `git log -5 --oneline`,
+   `git status --porcelain` — wird eigene Sektion im Prompt. Kein
+   Git-Repo → Sektion entfaellt ersatzlos.
+4. **Memory**: MEMORY.md-Index des Ziel-Workspace
+   (`~/.claude/projects/<workspace-id>/memory/`) und den globalen Index
+   (`~/.claude/memory/MEMORY.md`) scannen. Passende Memory-Files als
+   Lazy-Load-POINTER in den Prompt schreiben — Pfad + ein Halbsatz warum
+   relevant. Inhalte NICHT hineinkopieren.
+   **Aber:** Vom Auto-Memory laedt die neue Session nur die ersten 200 Zeilen
+   bzw. 25 KB der `MEMORY.md`, Topic-Files gar nicht. Was die neue Session
+   sicher wissen MUSS, gehoert deshalb in den Prompt selbst — ein Pointer
+   allein garantiert nichts. Auto-Memory ist ausserdem maschinenlokal und wird
+   NICHT an Subagents vererbt: was ein Explore-Subagent (Punkt 5) wissen muss,
+   muss in seinem Prompt stehen.
+   <!-- Beleg: code.claude.com/docs/en/memory#how-it-works + #storage-location, geprueft 2026-08-13 -->
+   Bewegliche Memory-Fakten vor Uebernahme auf `verified`/`stale_after_days`
+   pruefen; ab Claude Code v2.1.214 traegt jedes Memory-File mit Frontmatter
+   ein `modified`-Feld — das ist der billigste Aktualitaets-Check.
+5. **Relevante Dateien**: Grep nach Kern-Begriffen des Themas (plus
+   Synonyme), Glob nach passenden Dateinamen. Max 8 Kern-Dateien, nach
+   Relevanz sortiert. Bei grossen Repos (>~500 Quelldateien) EINEN
+   Explore-Subagent fuer die Suche losschicken statt selbst zu graben.
+
+## Schritt 3: Analyse (silent)
+
+Jede Kern-Datei per Read oeffnen — was du nicht gelesen hast, steht nicht
+im Prompt (Mantra 2). Pro Datei notieren:
+
 - Status: COMPLETE / PARTIAL / MISSING
-- Where is it imported/called? (integration points)
+- Anker: bevorzugt Funktions-/Klassennamen (ueberleben Edits),
+  Zeilennummern nur ergaenzend und mit `~` markiert
+- Integration: wo importiert/aufgerufen
 
-## Step 4: Identify gaps
+Daraus je nach Session-Typ 2-5 Gaps bzw. offene Punkte ableiten: Titel,
+Einstiegspunkt (Datei + Funktion), was fehlt (2-3 Saetze), Ansatz (1-2
+Saetze). Das ist ein Boden, keine Decke — wo die Analyse mehr hergibt,
+geh tiefer.
 
-From the analysis: What SHOULD exist but doesn't? What exists but isn't integrated?
+## Schritt 4: Prompt bauen (silent)
 
-For each gap (2-5 total):
-- Title (short, specific)
-- Entry point: file + function + line
-- What exactly is missing (2-3 sentences)
-- Suggested approach (1-2 sentences)
-
-## Step 5: Derive guardrails
-
-From CLAUDE.md, code analysis, and project conventions:
-- What must NOT be changed?
-- What rules apply? (commit format, CI requirements, style guides, etc.)
-- What limits exist? (performance budgets, size constraints, API limits, etc.)
-- What was RECENTLY implemented and should not be touched?
-
-## Step 6: Assemble the prompt
-
-Build the prompt using this template. The prompt goes inside a markdown code block (```):
+Der Prompt kommt in einen Markdown-Code-Block. Geruest (Sektionen ohne
+Inhalt entfallen ersatzlos, Typ-Sektionen aus Schritt 1 ersetzen den
+Gap-Block):
 
 ```
-You are working on the [project name] project ([absolute path]).
-Read the CLAUDE.md in the project root FIRST — it contains architecture, rules, and workflow.
+Du arbeitest am Projekt [Name] ([absoluter Pfad]).
 
-## Task: [Topic]
+## Task: [Thema]
+[2-4 Saetze: Problem, warum es zaehlt, Ziel dieser Session]
 
-### What is [Topic]?
-[2-4 sentences: problem, why it matters, goal]
+### Lies zuerst
+- AGENTS.md im Projekt-Root, sonst CLAUDE.md (Architektur, Regeln, Workflow)
+- [Memory-Pointer: Pfad + Halbsatz warum relevant]
 
-### What ALREADY EXISTS ([X]% — don't rebuild!)
+### Git-Stand bei Erstellung
+Branch [x], letzter Commit [hash + message], [N uncommitted Files / clean].
 
-READ THESE FILES FIRST before changing anything:
+### Kontext aus der Vor-Session
+[Nur was die neue Session BRAUCHT: Stand, Bewertungen mit Begruendung,
+Zwischenergebnisse. Keine Prozent-Schaetzungen, keine unbelegten Werte.]
 
-1. `path/file.ext` — Description (X lines, STATUS)
-   - Function/Class (line ~Y): What it does
-   - Integration: Where it's used
+### Entschiedenes — nicht neu aufrollen
+- [Verworfener Weg] — verworfen weil [Grund]
 
-[... more files ...]
+### Was schon existiert (nicht neu bauen)
+1. `pfad/datei.ext` — [Beschreibung] (STATUS)
+   - [Funktion/Klasse] (~Zeile): [was sie tut] — [wo genutzt]
 
-### What's MISSING (your job — close N gaps)
+### Was fehlt (dein Job — N Punkte)
+**Gap 1: [Titel]** — [was fehlt] · [Einstieg: Datei + Funktion] · [Ansatz]
 
-**Gap 1: [Title]**
-- [Current behavior / what's missing]
-- [Code entry point: file + line + function]
-- [Approach]
-
-[... more gaps ...]
+### Offene Fragen an Oliver
+- [Was die neue Session FRAGEN statt raten soll]
 
 ### Constraints
-- [Guardrail 1]
-- [Guardrail 2]
-[...]
+- [min 3 — aus AGENTS.md/CLAUDE.md, Konventionen, Grenzen des Projekts]
 
 ### Workflow
-1. Read ALL listed files COMPLETELY before planning
-2. Plan the gaps as isolated, independent changes
-3. Implement one gap at a time, each with:
-   - Code change
-   - Verification (lint, type-check, or syntax check appropriate for the language)
-4. After all gaps: run the project's test suite / build as a regression gate
-5. One commit per gap with a clear, descriptive message
+1. Gelistete Dateien KOMPLETT lesen, dann planen
+2. Ein Punkt nach dem anderen, je: Aenderung + Verifikation
+3. [Regression-Gate: Test-Suite/Build des Projekts]
+4. Ein Commit pro Punkt, [Commit-Konvention des Projekts]
 
 ### Verification
-- [Executable check 1 — a real bash command, not prose]
-- [Executable check 2]
-[...]
+- [Nur echte, lauffaehige Bash-Kommandos — keine Prosa]
+- [Mindestens EIN Kommando, dessen Ausgabe nur der NEUE Stand erzeugen kann
+  (Fingerabdruck): ein Wert aus der Antwort, ein Bundle-/Asset-Name, eine
+  Zeile aus dem Dienst-Log. Exit-Code 0, gruener Test und Deploy-Log sind
+  KEIN Fingerabdruck.]
 
-### What you must NOT do
-- [Explicit guardrail 1]
-- [Explicit guardrail 2]
-- [Explicit guardrail 3]
-[...]
+### Was du NICHT tun sollst
+- [min 3 explizite Leitplanken]
 ```
 
-## Step 7: Quality check and save
+**Warum die Verification-Sektion nicht optional ist:** Ohne einen Check, den
+die neue Session selbst ausfuehren kann, ist "sieht fertig aus" ihr einziges
+Stopp-Signal — und Oliver wird zur Pruefschleife. Der Prompt endet deshalb
+IMMER mit einem End-zu-End-Schritt, der beweist, dass die Sache laeuft. Wo ein
+Ergebnis ueber viele Zuege halten muss, den Check als `/goal`-Bedingung
+vorschlagen; wo er ausnahmslos gelten muss, als Stop-Hook.
+<!-- Beleg: code.claude.com/docs/en/best-practices#give-claude-a-way-to-verify-its-work, geprueft 2026-08-13 -->
 
-Check before saving:
-- Prompt is max 400 lines (shorten "What ALREADY EXISTS" to one-liners if needed)
-- All file paths are relative to the project root
-- Line numbers marked with ~
-- No dependency on the current session's state
-- At least 2 gaps, max 5
-- At least 3 constraints
-- Verification = executable commands (bash), not prose
-- "What you must NOT do" has at least 3 entries
-- Language of the prompt matches the project's primary language
-  (check CLAUDE.md and commit messages — if German project, write German; default to English)
+**Start-Modus mitgeben:** Ist der Weg unklar, betrifft die Aenderung mehrere
+Files oder ist der Code der neuen Session fremd → in den Workflow-Block
+"in Plan Mode starten (`Shift+Tab`)" schreiben. Ist der Diff in einem Satz
+beschreibbar → ausdruecklich "kein Plan Mode noetig" schreiben. Beides ist
+besser als Schweigen: sonst plant die neue Session bei Trivialem und stuerzt
+sich bei Unklarem ins Bauen.
 
-Save to: .planning/session-prompts/[topic-slug]-prompt.md
-(Slug: lowercase, hyphens, no special characters)
+## Schritt 5: Fresh-Eyes-Selbstcheck (hartes Gate vor dem Speichern)
 
-If .planning/ doesn't exist: create it.
+Lies den fertigen Prompt mit den Augen einer Session, die NICHTS weiss:
 
-Add this header above the code block:
+- Kein Satz referenziert dieses Gespraech implizit ("wie besprochen",
+  "siehe oben", "der Bot" ohne Einfuehrung) — jeden Treffer umformulieren.
+- Jeder Pfad im Prompt per Bash `test -e` geprueft. Toter Pfad: raus oder
+  explizit markieren als "existiert noch nicht — soll entstehen".
+- Jedes Verification-Kommando ist lauffaehiges Bash, keine Prosa.
+- Mindestens ein Verification-Kommando ist ein Fingerabdruck (Schritt 4) —
+  ein Check, den der ALTE Stand nicht bestehen wuerde.
+- Der Prompt nennt die beteiligten Files/Schnittstellen beim Namen, sagt was
+  ausdruecklich NICHT dazugehoert, und endet mit dem End-zu-End-Nachweis.
+- Max 400 Zeilen (notfalls "Was schon existiert" auf Einzeiler kuerzen),
+  min 3 Constraints, min 3 NICHT-Regeln.
+- Sprache = Projektsprache (in der Einleitung entschieden).
+
+Faellt ein Punkt durch: fixen, Check wiederholen. Erst dann speichern.
+
+## Schritt 6: Speichern + Kurz-Report
+
+Speichern nach `.planning/session-prompts/<topic-slug>-prompt.md`
+(Slug: lowercase, Bindestriche; Ordner bei Bedarf anlegen) mit Header
+UEBER dem Code-Block:
+
 ```
-# [Topic] — Session Prompt for Claude Code
-## Copy the prompt below and paste as first message in a new Claude Code session
+# [Thema] — Session-Prompt fuer Claude Code
+## Prompt unten kopieren und als erste Nachricht in eine neue Session einfuegen
+Erstellt: [Datum] · Datei-Stand kann veralten — aelter als ~2 Wochen: Git-Log pruefen
 ---
 ```
 
-Show the user the finished prompt and the save path.
+Dann brichst du das Schweigen. Im Chat NUR (max 25 Zeilen):
+
+- Speicherpfad
+- Session-Typ + Sprache des Prompts
+- 3-4 Bullets: was drin ist (Quellen, Punkte, Leitplanken)
+- Eine Bedeutungs-Zeile: was die neue Session damit NICHT mehr selbst
+  herausfinden oder erfragen muss
+
+## Wichtige Regeln fuer dich (den Context-Engineer)
+
+- **NIEMALS** Prozentzahlen, Bewertungen oder Fakten in den Prompt
+  schreiben, die nicht aus Read, Bash oder dem Session-Verlauf belegt sind
+- **NIEMALS** Projekt-Dateien aendern — dieser Command schreibt genau
+  EINE Datei: den Session-Prompt
+- **NIEMALS** den vollen Prompt ungefragt in den Chat dumpen — Kurz-Report
+  reicht, Volltext nur auf explizite Nachfrage
+- **NIEMALS** einen bestehenden Session-Prompt ohne das Gate aus
+  Schritt 0 ueberschreiben
+- **IMMER** die Session-Kontext-Quelle ZUERST leeren — die Frage "was
+  ginge verloren, wenn die Session jetzt endet?" kommt vor jeder Repo-Analyse
+- **IMMER** den Fresh-Eyes-Check komplett durchlaufen, bevor gespeichert wird
+- **IMMER** Memory als Pointer verlinken, nie Inhalte duplizieren
+
+## Wann diesen Command ausfuehren?
+
+- Vor Session-Ende, wenn Arbeit oder eine Analyse weitergehen soll
+- Wenn der Kontext gross wird und ein sauberer Neustart klueger ist
+- Wenn ein Thema aus dem Gespraech in eine eigene Session ausgelagert wird
