@@ -6,17 +6,39 @@ SKILL.md.
 
 ---
 
-## 1. CLAUDE.md (max 60 Zeilen)
+## 1. AGENTS.md (Substanz, max 60 Zeilen) + CLAUDE.md (Pointer, 1 Zeile)
 
-Aufbau in dieser Reihenfolge:
+Die Substanz liegt in `AGENTS.md` — dem Standard, den Codex direkt liest.
+`CLAUDE.md` ist NUR ein Pointer, exakt eine Zeile, kein Frontmatter,
+kein weiterer Text:
 
+```
+@AGENTS.md
+```
+
+Claude Code expandiert den Import beim Start und liest damit dieselbe
+Substanz. Bereichs-Dateien in Unterordnern bleiben normale `CLAUDE.md`
+(Codex-Verhalten bei verschachtelten AGENTS.md ungeprueft — nicht umstellen).
+
+Aufbau AGENTS.md in dieser Reihenfolge:
+
+- Optionales Frontmatter GANZ am Anfang (nur wenn parent-zone abgeleitet
+  wurde, siehe SKILL.md Phase 3.3):
+  ```yaml
+  ---
+  parent_zone: <products|clients|capital|knowledge|ops>
+  ---
+  ```
 - H1: Projektname + Halbsatz worum es geht
-- Direkt darunter zwei Imports:
+- Direkt darunter zwei Imports plus eine Klartext-Zeile:
   ```
   @CONTEXT.md
   @REFERENCES.md
+
+  Die `@`-Zeilen sind zugleich Claude-Code-Imports; andere Tools folgen
+  der Klartext-Anweisung: CONTEXT.md und REFERENCES.md mitlesen.
   ```
-  (Ohne diese Imports waeren beide Files unsichtbar fuer Claude.)
+  (Ohne die Imports waeren beide Files unsichtbar fuer Claude.)
 - 2-3 Saetze: was genau, fuer wen
 - Sektionen die diese vier Informations-Typen abdecken (Sektions-Namen frei):
   - **Project Understanding** — Ziele, getroffene Entscheidungen, harte
@@ -24,23 +46,26 @@ Aufbau in dieser Reihenfolge:
   - **People Context** — wer arbeitet mit, fuer wen wird gebaut. Solo:
     "ich + Claude als Sparringspartner"
   - **Working Preferences** — Sprache, Workflow-Regeln, Bestaetigungs-Punkte.
-    **Pflicht-Zeile fuer Living-Doc-Vertrag (wortwoertlich):**
-    > CONTEXT.md ist Living-Doc — wenn `last_updated` >30 Tage: "Aktueller Stand" review.
+    **Pflicht-Zeile fuer Living-Doc-Vertrag** — Satz frei formulierbar,
+    der Anker-Kommentar am Zeilenende ist Pflicht (verify.sh greppt ihn):
+    > CONTEXT.md ist Living-Doc — wenn `last_updated` >30 Tage: "Aktueller Stand" review. <!-- spark:living-doc -->
   - **Aktueller Fokus (Stand: <heutiges Datum>)** — max 3 Punkte was JETZT
     dran ist
 - Bei 3+ Top-Level-Unterordnern: zusaetzlich **Dokument-Index** (eine Zeile
   pro Top-Level-Ordner)
-- **Eine Zeile zu Craft-Principles (Pflicht):**
+- **Eine Zeile zu Craft-Principles (Pflicht, Anker am Zeilenende):**
   > Craft-Principles: siehe `decisions/000-craft-principles.md` — bei
-  > Konflikt mit einer Saeule: Entscheidung anpassen, nicht Saeulen.
+  > Konflikt mit einer Saeule: Entscheidung anpassen, nicht Saeulen. <!-- spark:craft -->
 - **GANZ ZUM SCHLUSS**: `## IMPORTANT — Critical Rules` mit max 3
-  Always-On-Regeln (mehr Marker = Inflation). Pflicht-Eintrag wortwoertlich:
+  Always-On-Regeln (mehr Marker = Inflation). Pflicht-Eintrag wortwoertlich
+  — aber NUR bei Code-Profil ≠ none oder wenn Secrets/APIs vorkommen (bei
+  reinen Doku-/Wissensprojekten entfaellt die Zeile):
   > DO NOT commit Geheimnisse — alles in `.env`, `.env` ist in `.gitignore`.
 
 **Goldene Regel** (Boris Cherny): Frag bei jeder Zeile "wuerde Claude ohne
 diese Zeile einen Fehler machen?". Wenn nein — weglassen.
 
-**Regeln pro CLAUDE.md (Haupt UND Bereichs):**
+**Regeln pro Instruktionsdatei (AGENTS.md UND Bereichs-CLAUDE.md):**
 - Jede Regel ueberpruefbar ("Funktionen max 40 Zeilen" statt "sauber coden")
 - Trigger-Action-Format wo moeglich ("Wenn X, tu Y")
 - Format-Regeln gehoeren in Linter, nicht hier
@@ -52,7 +77,7 @@ Beispiele fuer echte Abweichungen die rein duerfen:
 - "Tests laufen gegen echte Postgres, nicht gegen Mocks"
 
 Reine Defaults wie "verwende async/await" oder "pytest fuer Tests" gehoeren
-NICHT in CLAUDE.md.
+NICHT in AGENTS.md.
 
 ---
 
@@ -108,9 +133,9 @@ Fuer Menschen, GitHub-sichtbar:
 
 ## 5. .gitignore
 
-**Genau eines** im Projekt-Root, nirgendwo sonst. Standard-Ignores fuer
-Secrets/OS. Bei Code-Profil sprach-spezifisch erweitern (siehe
-`references/code-profiles.md`).
+Anzahl-Regel (genau eines im Root, auch bei hybrid): SSoT ist die
+Anti-Pattern-Liste in SKILL.md. Standard-Ignores fuer Secrets/OS. Bei
+Code-Profil sprach-spezifisch erweitern (siehe `references/code-profiles.md`).
 
 ---
 

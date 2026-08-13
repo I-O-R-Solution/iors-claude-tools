@@ -26,14 +26,23 @@ Skip mit Hinweis (siehe SKILL.md Phase 3.0).
 ## Profil `node-ts`
 
 - `package.json`: `scripts.dev/build/test/lint/typecheck`, `type: "module"`,
-  leere `dependencies` und `devDependencies`
+  leere `dependencies` und `devDependencies`. **Scripts ohne gewaehltes Tool
+  sind ehrliche Platzhalter** — nicht ins Leere zeigen lassen:
+  `"test": "echo 'Test-Runner waehlen (vitest/jest), dann Script ersetzen' && exit 1"`,
+  gleiches Muster fuer ALLE fuenf Scripts (`dev`/`build`/`lint`/`typecheck`
+  analog, mit passendem Tool-Hinweis), solange das jeweilige Tool nicht
+  gewaehlt ist
 - `tsconfig.json`: `strict: true`, `target: ES2022`, `module: ESNext`,
   `moduleResolution: bundler`
 - `.nvmrc` mit aktueller LTS
 - `src/index.ts` mit `console.log("hello")` Platzhalter
-- `tests/example.test.ts` mit einem trivialen `expect(1).toBe(1)`
+- `tests/example.test.ts` mit einem trivialen `expect(1).toBe(1)` +
+  Kommentar-Header "laeuft erst wenn ein Test-Runner gewaehlt und
+  `scripts.test` ersetzt ist"
 - `.env.example`
-- README "Setup": `npm install && npm run dev`
+- README "Setup": nur `npm install` — `npm run dev` erst nennen, wenn ein
+  Dev-Runner gewaehlt und das Platzhalter-Script ersetzt ist (sonst verletzt
+  die README die Generic-Regel "ausfuehrbare Befehle" unten)
 - `.gitignore` ergaenzen: `node_modules/`, `dist/`, `.next/`, `coverage/`,
   `*.tsbuildinfo`
 
@@ -63,7 +72,8 @@ Wie `node-ts` ohne `tsconfig.json`, `src/index.js`, `tests/example.test.js`.
 
 Pro Sprach-Top-Level-Ordner das jeweilige Profil-Set in DIESEN Ordner
 schreiben (eigene `pyproject.toml` in `backend/`, eigene `package.json` in
-`frontend/`). `.gitignore` im Root sammelt alle Sprach-Ignores.
+`frontend/`). `.gitignore`: genau EINS im Root, sammelt alle Sprach-Ignores
+(SSoT der Regel: Anti-Pattern-Liste in SKILL.md).
 
 ## Generic — immer wenn Code-Profil aktiv
 
