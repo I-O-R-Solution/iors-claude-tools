@@ -19,7 +19,7 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 
 | Skill | Trigger | Purpose |
 |---|---|---|
-| `session-ende` | "Schluss" / "Ende" / "Feierabend" | Session-end protocol: memory check, chronicle check, distill check, open items, integrity check. |
+| `session-ende` | "Schluss" / "Ende" / "Feierabend" | Session-end protocol: memory check, chronicle check, distill check, open items, integrity check. **Not part of the starter package** — expects an existing memory setup under `~/.claude/` (`docs/memory-protocol.md`, `chronicle/`, `episodes/`, `hooks/wurzel-fruehwarnung.sh`, `/memory-audit`). Without those it runs into empty paths. Same for `/ende`, which only points at it. |
 | `spark` | "neues Projekt" / "scaffold" / "bootstrap" / "Grundgeruest" / "kick off" | Quality-First project bootstrap. Adaptive input (rich description OR 3-question fallback), Excellence-Anchor (3 sharpening questions), Craft-Principles as Decision-000 ADR, mandatory trio (CLAUDE.md/CONTEXT.md/REFERENCES.md) plus README/.gitignore/decisions/, conditional code-tooling skeleton (Python/Node-TS/Rust/Go), idempotent re-runs, auto-review via `/claudemd-optimize`. |
 
 ## Installation fuer Einsteiger (Windows, PowerShell)
@@ -67,33 +67,28 @@ Projekt-Doku nicht — es registriert die Hooks nicht.
 
 ## Installation (macOS/Linux, bash)
 
-Copy the files into your local Claude Code config directory:
-
-```bash
-# Commands
-cp commands/einrichtung.md ~/.claude/commands/
-cp commands/check.md ~/.claude/commands/
-cp commands/claudemd-optimize.md ~/.claude/commands/
-cp commands/prepare-session.md ~/.claude/commands/
-cp commands/ende.md ~/.claude/commands/
-cp commands/spark.md ~/.claude/commands/
-
-# Skills
-cp -r skills/session-ende ~/.claude/skills/
-cp -r skills/spark ~/.claude/skills/   # includes references/ and scripts/ subfolders
-```
-
-Or clone the repo and symlink the directories:
+Same starter package as above:
 
 ```bash
 git clone https://github.com/I-O-R-Solution/iors-claude-tools.git
-ln -s "$PWD/iors-claude-tools/commands/check.md" ~/.claude/commands/
-ln -s "$PWD/iors-claude-tools/commands/claudemd-optimize.md" ~/.claude/commands/
-ln -s "$PWD/iors-claude-tools/commands/prepare-session.md" ~/.claude/commands/
-ln -s "$PWD/iors-claude-tools/commands/ende.md" ~/.claude/commands/
-ln -s "$PWD/iors-claude-tools/commands/spark.md" ~/.claude/commands/
-ln -s "$PWD/iors-claude-tools/skills/session-ende" ~/.claude/skills/
-ln -s "$PWD/iors-claude-tools/skills/spark" ~/.claude/skills/
+cd iors-claude-tools
+mkdir -p ~/.claude/commands ~/.claude/skills
+
+cp commands/einrichtung.md       ~/.claude/commands/
+cp commands/spark.md             ~/.claude/commands/
+cp commands/prepare-session.md   ~/.claude/commands/
+cp commands/claudemd-optimize.md ~/.claude/commands/
+cp -r skills/spark               ~/.claude/skills/   # includes references/ and scripts/
+```
+
+Restart Claude Code, then start with `/einrichtung`.
+
+**Beyond the starter package** — only if you know you want them:
+
+```bash
+cp commands/check.md ~/.claude/commands/          # code review, self-contained
+cp commands/ende.md  ~/.claude/commands/          # needs session-ende AND a memory setup
+cp -r skills/session-ende ~/.claude/skills/       # see the note in the skills table
 ```
 
 ## Usage
@@ -185,4 +180,5 @@ Open a PR with the proposed change. Each command/skill should:
 
 ## License
 
-Internal use within I-O-R-Solution.
+Free to use and adapt for I-O-R-Solution team members, coaching participants and
+their companies. No warranty — these are working tools, not a product.
