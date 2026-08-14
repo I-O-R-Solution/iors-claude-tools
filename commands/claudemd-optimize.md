@@ -40,6 +40,17 @@ eine gefunden wird UND der User kein explizites Argument gegeben hat:
 listen, fragen *"welche reviewen?"*, dann fortfahren. Verhindert dass eine
 tieferliegende CLAUDE.md still uebersehen wird.
 
+**Rolle der Ziel-Datei bestimmen** (steuert Schritt 5, kein eigener Output). Der
+Walk-up aus Schritt 3 liefert die Antwort ohne zusaetzlichen Tool-Call:
+
+- **Wurzel-Datei** — `~/.claude/CLAUDE.md` (global) oder die `CLAUDE.md`/`AGENTS.md` im
+  Projekt-Root (die oberste Ebene mit `.git`, sonst der Ordner, ab dem der Walk-up nur
+  noch fremde Projekte findet)
+- **Bereichs-Datei** — jede `CLAUDE.md` unterhalb dieses Projekt-Roots
+
+Die Rolle entscheidet, was ueberhaupt hineingehoert. Beide Sorten werden hier geprueft,
+aber gegen verschiedene Massstaebe.
+
 Lies die Ziel-Datei KOMPLETT mit Read.
 
 ## Schritt 2: Metriken
@@ -89,7 +100,8 @@ getrennt bewerten.
 
 **Strukturelle Fallen explizit pruefen:**
 
-- **Subdir-CLAUDE.md + /compact-Falle:** Wenn Ziel-Datei eine Subdir-CLAUDE.md ist und wichtige Regeln enthaelt → flaggen: *"`/compact` re-injected nur die Root-CLAUDE.md, nicht Subdir-Files. Wichtige Regeln gehoeren ins Root oder per `@`-Import eingebunden."*
+- **Bereichs-Datei ist nicht always-on:** Eine `CLAUDE.md` im Unterordner laedt ueberhaupt erst, wenn Claude dort eine Datei liest — nicht beim Start. Nach `/compact` verschwindet sie wieder, zusammen mit allen `paths:`-Rules, und kommt erst beim naechsten Lesen zurueck. Zweimal derselbe Ausgang, nicht zwei Probleme. Folge: Eine Regel, die ausnahmslos gelten muss, ist hier falsch platziert — flaggen und auf die Verbindlichkeits-Leiter in Schritt 5 verweisen. Niemals `@`-Import als Ausweg empfehlen (spart nichts, siehe naechster Punkt).
+  <!-- Beleg: memory.md#how-claude-md-files-load — "Instead of loading them at launch, they are included when Claude reads files in those subdirectories"; memory.md#compaction — "Nested CLAUDE.md files in subdirectories and rules with paths: frontmatter are not re-injected automatically". Deckungsgleich mit spark/SKILL.md:340. Umgebaut 2026-08-14 — vorher argumentierte der Punkt nur ueber /compact und empfahl @-Import. -->
 - **`@`-Import kostet vollen Kontext, spart keinen:** Importierte Files werden beim Launch expandiert und vollstaendig ins Fenster geladen. Aufteilen schafft Ordnung, KEIN Budget. Wer Kontext sparen will, braucht `paths:`-Rules (on-demand), Skills (on-demand) oder Markdown-Links (laden gar nicht). Max Import-Tiefe: 4 Hops. Imports in Backticks werden nicht aufgeloest.
   <!-- Beleg: memory.md#import-additional-files — "Imported files are expanded and loaded into context at launch"; memory.md#my-claude-md-is-too-large — "Splitting into @path imports helps organization but doesn't reduce context". -->
 - **`@`-Pfad-Aufloesung:** Relative `@path`-Imports loesen **relativ zur importierenden Datei** auf, nicht zum Workspace-Root. Absolute Pfade und `~/`-Pfade sind erlaubt. Ein Import, dessen Pfad ausserhalb des Working Directory landet (z.B. `@~/.claude/x.md` in einer Projekt-CLAUDE.md), ist ein *external import*: beim ersten Auftreten zeigt Claude Code einen Approval-Dialog; wird er abgelehnt, bleiben die Imports dauerhaft aus. Bei User-Scope-Files (`~/.claude/CLAUDE.md`, `~/.claude/rules/`) entfaellt der Dialog.
@@ -120,23 +132,52 @@ getrennt bewerten.
 - Bei Zero-Tolerance-Regeln (irreversibel, Sicherheit, Compliance): **IMMER Hook empfehlen**, niemals nur CLAUDE.md. Anker: GitHub #32193 dokumentiert 13 Verstoesse gegen eine Zero-Tolerance-Regel trotz IMPORTANT-Formatierung. *"The model should never be the sole enforcer of its own constraints."*
 
 **Prinzip 8 — Anti-Patterns + Auto-Generated-Detection:** Style-Guide (gehoert in Linter); Redundanz zu Rules; Personas; nicht-erklaerende Beispiele; Sprach-Mix; Chronicle/Changelog inline; Datei-fuer-Datei-Inventare; Prosa-Wuerste.
-- **Auto-Generated-Geruch besonders hart flaggen:** Wenn die Datei Sektionen wie *"## Directory Structure"* mit Inventar-Bullets, *"## Common Commands"* mit npm-Defaults, oder *"## Architecture"* mit generischer Prosa enthaelt, ist sie wahrscheinlich aus naivem `/init` und schadet messbar. Empfehlung: komplett kuratieren oder leeren.
+- **Auto-Generated-Geruch besonders hart flaggen:** Sektionen wie *"## Common Commands"* mit npm-Defaults oder *"## Architecture"* mit generischer Prosa stammen wahrscheinlich aus naivem `/init` und schaden messbar. Empfehlung: komplett kuratieren oder leeren.
 <!-- Beleg: Lakshminp-Benchmark April 2026 — naive /init-Files +20% Inferenz-Kosten + niedrigere Erfolgsrate gegenueber leerer Datei. -->
+- **Ordner-Sektion: erst pruefen, dann flaggen.** Eine Sektion ueber die Ordnerstruktur ist NICHT automatisch Auto-Generated-Geruch. **Pruefrage:** Steht neben dem Ort eine Aussage, die man **nicht** aus `ls` ablesen kann — was dort hinein darf, welche Aufgabe dorthin fuehrt, welche Regel dort gilt?
+  - **Nein → Inventar.** Datei-fuer-Datei-Liste, spiegelt nur den Ordnerbaum, veraltet beim naechsten `mkdir`. Hart flaggen (Prinzip 3, Lakshminp-Begruendung oben).
+  - **Ja → Wegweiser.** Das ist der *Document Index* aus Schritt 5, also das Gegenteil eines Befunds. Stehenlassen, auch wenn er Zeilen kostet. Gilt in **beiden** Rollen: In einer Bereichs-Datei ist eine Karte der *eigenen* Unterordner legitime oertliche Information. Nur flaggen, wenn sie die Uebersicht der Wurzel wiederholt (Schritt 5, "Zu viel").
+
+  Trennlinie an einem Beispiel: `decisions/ — ADRs` ist Inventar. `decisions/ — jede uebernommene oder verworfene Empfehlung, mit Begruendung; hierhin fuehrt "etwas entscheiden"` ist ein Wegweiser.
 
 **Prinzip 9 — Golden-Rule-Test (Anthropic offiziell):** Pro Zeile fragen: *"Wuerde Claude ohne diese Zeile einen Fehler machen?"* Wenn nein → streichen. Ohne Schuldgefuehl, ohne Ersatz. Das ist das primaere Kuerz-Kriterium und schlaegt jede andere Heuristik.
 
 ## Schritt 5: Redundanz, Gap, Konstruktive Fixes
 
-**Redundanz:** Lies `~/.claude/rules/*.md` (Glob) + globale CLAUDE.md (bei Projekt/Subdir) + parent (bei Subdir). Doppelungen markieren.
+**Redundanz:** Lies `~/.claude/rules/*.md` (Glob) + globale CLAUDE.md (bei Projekt/Bereich) + parent (bei Bereichs-Datei). Doppelungen markieren.
 
-**Gap — Stulbergs 4 Pflicht-Kategorien** (nur flaggen wenn fehlend UND projekt-relevant):
+**Die Gap-Pruefung haengt an der Rolle aus Schritt 1.** Was in einer Wurzel-Datei fehlt,
+ist in einer Bereichs-Datei zu viel. Wer beide gleich prueft, empfiehlt der Haelfte der
+Dateien das Falsche.
 
-1. **Document Index** — Wo liegt was? Ordnerstruktur, MCP-Server, Pointer auf wichtige Files
+### Wurzel-Datei (Projekt-Root oder global)
+
+**Stulbergs 4 Pflicht-Kategorien** (nur flaggen wenn fehlend UND projekt-relevant):
+
+1. **Document Index** — Wo liegt was? Ordnerstruktur **mit Erklaerung** (Wegweiser, nicht Inventar — Prinzip 8), MCP-Server, Pointer auf wichtige Files
 2. **People** — Namen, Rollen, Beziehungen (damit "Lisa will pushen" ohne Re-Erklaerung verstaendlich ist)
 3. **Identity / Goals** — Was ist das, was sind die Ziele, getroffene Entscheidungen
 4. **How you want things done** — Workflows, Guardrails, Praeferenzen
 
 **Gap — projekt-spezifische Befehle:** Build/Run/Test/Deploy-Bash, Test-Runner, Branch-Konventionen, Env/Secrets-Handling, Architektur-Why.
+
+### Bereichs-Datei (Unterordner)
+
+Die vier Kategorien gelten hier **nicht** — sie stehen schon in der Wurzel, und die ist
+beim Lesen dieser Datei laengst geladen (Prinzip 5: Ebenen addieren sich, sie ersetzen
+einander nicht). Stattdessen genau zwei Fragen:
+
+- **Zu viel?** Projekt-Identitaet, Personen, Ordner-Uebersicht oder Regeln, die schon in der Wurzel stehen → streichen. Das ist ein Befund fuer "Was raus oder kuerzer muss", nicht fuer "Was fehlt".
+- **Falscher Ort?** Steht hier eine Regel, die **ausnahmslos** gelten muss? Dann ist die Bereichs-Datei falsch, weil sie erst laedt, wenn Claude hier eine Datei liest (Schritt 3). Verbindlichkeits-Leiter:
+  1. *muss immer gelten* → Wurzel-Datei oder Rule **ohne** `paths:` — nur diese beiden sind always-on
+  2. *gilt nur fuer diesen Bereich, aber verbindlich* → `.claude/rules/<thema>.md` **mit** `paths:`
+  3. *darf nie gebrochen werden* → Hook (Prinzip 7)
+
+  Stufe 2 ist **kein** Ersatz fuer Stufe 1: `paths:`-Rules kommen nach `/compact` genauso wenig zurueck wie eine Bereichs-Datei.
+
+Was hier **hin gehoert**: nur die oertliche Abweichung — was in diesem Bereich anders ist
+als in der Wurzel, mit dem Warum. Fehlt das und die Datei enthaelt sonst nur Wiederholung,
+lautet die richtige Empfehlung "loeschen", nicht "kuerzen".
 
 **Sprach-Konsistenz:** Datei in einer Sprache? "Antworte auf X"-Regel selbst in X formuliert?
 
@@ -157,7 +198,7 @@ Wenn nichts fehlt: explizit "kein Gap" sagen — nichts erfinden.
 ```
 # Review: <pfad>
 
-**<Eine-Zeile-Verdikt>** — Score X/5 — N Zeilen / ~I Instructions (Zone), Hierarchie-Summe M Z. / ~J Instructions (Zone), ~K Slots
+**<Eine-Zeile-Verdikt>** — <Wurzel-Datei|Bereichs-Datei> — Score X/5 — N Zeilen / ~I Instructions (Zone), Hierarchie-Summe M Z. / ~J Instructions (Zone), ~K Slots
 
 ## Was gut ist (nicht anfassen)
 - <Section/Aspekt>: <warum>
@@ -170,7 +211,9 @@ Wenn nichts fehlt: explizit "kein Gap" sagen — nichts erfinden.
 Bei Zero-Tolerance: Hook vorschlagen. Bei Workflows: Skill vorschlagen.)
 
 ## Was fehlt
-- <konkreter Gap aus Stulbergs 4 Kategorien oder projekt-spezifisch>
+- <Wurzel-Datei: konkreter Gap aus Stulbergs 4 Kategorien oder projekt-spezifisch.
+Bereichs-Datei: nur die fehlende oertliche Abweichung — NIE Identitaet, Personen
+oder Ordner-Uebersicht verlangen.>
 (oder: "kein Gap")
 
 ## Empfehlung
@@ -214,6 +257,8 @@ Wenn der User waehrend des Reviews mitteilt, dass eine konkrete Regel ignoriert 
 - **NIEMALS** Quick-Wins von "tiefgreifend" trennen — alles in "Was raus oder kuerzer muss", nach Impact sortiert.
 - **NIEMALS** Projected-Score oder 3-Satz-Zusammenfassung anhaengen.
 - **NIEMALS** mehrere Files gleichzeitig — ein Aufruf = eine Datei.
+- **IMMER** die Rolle (Wurzel gegen Bereich, Schritt 1) vor der Gap-Pruefung bestimmen — Stulbergs vier Kategorien gelten nur fuer Wurzel-Dateien. In einer Bereichs-Datei sind sie ein Befund fuer "zu viel", nicht fuer "fehlt".
+- **IMMER** vor dem Auto-Generated-Flag die Pruefrage aus Prinzip 8 stellen. Ein Wegweiser mit Begruendung ist kein Inventar — und in der Wurzel Pflicht, nicht Ballast.
 - **IMMER** Hierarchie-Summe via Walk-up einrechnen (Definition in Schritt 3).
 - **IMMER** Instructions- und Slot-Schaetzung neben Zeilen ausweisen (Faktor 0.6, Definition in Schritt 3) — Studien messen Compliance vs. Instructions, nicht Zeilen.
 - **IMMER** konkrete Zeilen/Aktionen ("-16 Zeilen, in ROADMAP.md auslagern") statt vage ("kuerzen").
