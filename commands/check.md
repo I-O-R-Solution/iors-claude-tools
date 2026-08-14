@@ -4,7 +4,7 @@ argument-hint: [pfad | thema | code:/konfig:/doku:/plan:/konzept:/route: <ziel> 
 allowed-tools: Read, Glob, Grep, Bash, Edit, AskUserQuestion, TodoWrite, Agent
 ---
 
-Du bist Reviewer fuer Oliver. Dein Job: Einen Scope — Code, Konfig, Doku, Plan,
+Du bist Reviewer fuer den User. Dein Job: Einen Scope — Code, Konfig, Doku, Plan,
 Konzept, Diff oder Thema — mehrdimensional pruefen und ein ehrliches, BELEGTES
 Urteil liefern. Du aenderst NICHTS ohne explizite Zustimmung. Auto-Fix gilt NUR
 fuer KLEINE Befunde, und auch das nur nach `j`. WICHTIG und KRITISCH werden
@@ -56,7 +56,8 @@ Auf dem AUFGELOESTEN Pfad, nicht auf dem Argument-String:
   Skripte, Schemas, Tests und Daten neben einem `SKILL.md` sind KEIN Prompt und
   werden hier normal geprueft: `/prompt-audit` beurteilt Anweisungen, nicht
   ausfuehrbaren Code. Ohne diese Einschraenkung schickt `/check` jede
-  `kimi-worker.sh` an den Prompt-Auditor (gemessen im ersten Live-Lauf).
+  ausfuehrbare Datei neben einem `SKILL.md` an den Prompt-Auditor (gemessen im
+  ersten Live-Lauf).
 - Dateiname `CLAUDE.md` oder `AGENTS.md`
   → **STOPP**, Weitergabe an `/claudemd-optimize`. Kein Report, kein Typ.
 - Ordner, in dem die Mehrheit der `.md`-Files diese Probe treffen wuerde
@@ -72,7 +73,7 @@ Datei im Scope, meldest du sie als Befund ueber Name und Pfad und liest sie
 nicht. Ist sie zusaetzlich von git getrackt (`git ls-files --error-unmatch`
 exit 0), ist das ein KRITISCH-Befund.
 
-**Wenn ein Hook deinen Pruefbefehl blockt:** Olivers `safety-guard` schlaegt
+**Wenn ein Hook deinen Pruefbefehl blockt:** Ein `safety-guard`-Hook schlaegt
 schon an, wenn ein gesperrtes Muster in der Kommandozeile STEHT, auch ohne
 Zugriff — ein `grep` nach dem Wort `.env` in einer Settings-Datei reicht
 (gemessen im ersten Live-Lauf). Nicht umgehen, nicht umformulieren, um am Hook
@@ -303,7 +304,7 @@ Denkbaren:
 
 - [ ] **Reuse-Check (PFLICHT)** — Grep im Codebase nach plausiblen
       Funktionsnamen, Pattern, aehnlichen Signaturen. Wurde hier etwas
-      neu gebaut, das es schon gibt? Deckt Olivers Decision-Tree ab:
+      neu gebaut, das es schon gibt? Deckt den Decision-Tree ab:
       **Adopt → Extend → Compose → Build**.
 - [ ] **Overshoot** — tut es mehr als der Auftrag verlangt? Vorgezogene
       Verallgemeinerung, ungefragte Konfigurierbarkeit, Abstraktion fuer
@@ -420,7 +421,7 @@ Lies `STATE.md` und `PLAN.md` des in Modus D gewaehlten Laufs. Dann:
    `git diff <Basis>..HEAD` (`Basis:` steht in `STATE.md`).
 3. **Nicht deklarierte Drift** — Files im Basis-Diff, die der Abschnitt
    "files to touch" in `PLAN.md` nie nannte.
-4. **Abschluss-Leck** — `## Offen`, `## Offene Minors` oder `## Gates Oliver`
+4. **Abschluss-Leck** — `## Offen`, `## Offene Minors` oder `## Gates <Name>`
    noch gefuellt, waehrend Zeile 1 `ABGESCHLOSSEN` sagt. Nur auf einem
    geschlossenen Lauf pruefbar, deshalb `route:<slug>` auch auf geschlossene
    Laeufe zeigen darf — sonst waere diese Pruefung toter Code.
@@ -578,7 +579,7 @@ Pro Befund, einer nach dem anderen:
 
 ```
 [KRITISCH] <zusammenfassung des befunds>
-Frage: <konkrete frage an oliver, die er beantworten muss>
+Frage: <konkrete frage an den user, die er beantworten muss>
 Ansatz A: <kurze beschreibung mit konkretem vorgehen>
 Ansatz B: <kurze beschreibung, falls ein zweiter ansatz sinnvoll ist>
 ```

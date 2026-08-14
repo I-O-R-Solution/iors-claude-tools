@@ -4,7 +4,7 @@ argument-hint: [thema | feature | leer = Thema aus laufender Session ableiten]
 allowed-tools: Read, Glob, Grep, Bash, Write, AskUserQuestion, Agent
 ---
 
-Du bist Olivers Context-Engineer. Dein Job: EINEN copy-ready Session-Prompt
+Du bist der Context-Engineer des Users. Dein Job: EINEN copy-ready Session-Prompt
 bauen, der eine NEUE Claude-Code-Session sofort produktiv macht — ohne
 Kontext-Verlust. Der Prompt landet als Datei im Projekt; im Chat gibt es
 nur einen Kurz-Report. Abgrenzung: laeuft gerade ein `/route`-Lauf, ist die
@@ -54,7 +54,7 @@ mischen, nicht rueckfragen.
 ## Schritt 2: Quellen einsammeln (silent)
 
 **Diese Phase ist SILENT** — ebenso Schritt 3 und 4. Der naechste Output
-an Oliver ist der Kurz-Report in Schritt 6 (plus die Gates aus Schritt 0).
+an den User ist der Kurz-Report in Schritt 6 (plus die Gates aus Schritt 0).
 
 1. **Laufende Session** (wichtigste Quelle): Was ginge verloren, wenn die
    Session JETZT endet? Getroffene Entscheidungen, Bewertungen mit
@@ -66,7 +66,7 @@ an Oliver ist der Kurz-Report in Schritt 6 (plus die Gates aus Schritt 0).
    README.md, Planning-Files (.planning/, docs/, .github/) — was existiert.
    Existiert NICHTS davon: Projektstruktur per Glob erfassen
    (`**/*.{py,ts,js,go,rs,java,rb,md}`) und Mission aus Session-Verlauf
-   ableiten; nur wenn auch der leer ist, Oliver fragen.
+   ableiten; nur wenn auch der leer ist, den User fragen.
 3. **Git-Stand**: `git branch --show-current`, `git log -5 --oneline`,
    `git status --porcelain` — wird eigene Sektion im Prompt. Kein
    Git-Repo → Sektion entfaellt ersatzlos.
@@ -138,7 +138,7 @@ Zwischenergebnisse. Keine Prozent-Schaetzungen, keine unbelegten Werte.]
 ### Was fehlt (dein Job — N Punkte)
 **Gap 1: [Titel]** — [was fehlt] · [Einstieg: Datei + Funktion] · [Ansatz]
 
-### Offene Fragen an Oliver
+### Offene Fragen an den User
 - [Was die neue Session FRAGEN statt raten soll]
 
 ### Constraints
@@ -163,7 +163,7 @@ Zwischenergebnisse. Keine Prozent-Schaetzungen, keine unbelegten Werte.]
 
 **Warum die Verification-Sektion nicht optional ist:** Ohne einen Check, den
 die neue Session selbst ausfuehren kann, ist "sieht fertig aus" ihr einziges
-Stopp-Signal — und Oliver wird zur Pruefschleife. Der Prompt endet deshalb
+Stopp-Signal — und der User wird zur Pruefschleife. Der Prompt endet deshalb
 IMMER mit einem End-zu-End-Schritt, der beweist, dass die Sache laeuft. Wo ein
 Ergebnis ueber viele Zuege halten muss, den Check als `/goal`-Bedingung
 vorschlagen; wo er ausnahmslos gelten muss, als Stop-Hook.
