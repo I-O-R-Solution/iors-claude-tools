@@ -1,0 +1,31 @@
+{
+  "$comment": "checks[] traegt die Rot-Zeugen (Schritt 2/5/6.1). Ein Gruen ohne beobachtetes Rot ist unbewiesen - das Feld macht die Luecke sichtbar, statt sie der Boss-Disziplin zu ueberlassen. fired_rule = welche Regel/Guard das pass/block erzeugte (Attribution - 5/6 Proben starben einmal an einem aelteren Guard und meldeten gruen); green_first = Beleg, dass derselbe Check am intakten Fixture zuerst gruen war (Gruen-Vorlauf - ein nie gruen gesehener Check beweist mit seinem Rot nichts); red_before = was derselbe Check am UNBERUEHRTEN Stand vor DIESEM Bau gemessen hat. Warum als Pflichtfeld (Prozess-Audit 17.08.2026): die Rot-Erstmessung ist der billigste Rot-Zeuge (LESSONS.md, stufe1-infrastruktur: 6 von 7 Praedikaten standen rot, bevor eine Zeile gebaut war), 8 von 21 Plan-Blockern waren allein damit erreichbar - sie stand als Prosa in LESSONS.md UND woertlich in .planning/route/art4-neufassung/PLAN.md:283-290 und wurde trotzdem ignoriert. Eine zweimal ueberlesene Erinnerung wird zum Feld. Legitime Ausnahme, weil sonst ein Falsch-Rot-Erzeuger entsteht: Erhaltungs-Praedikate ('das darf sich nicht aendern') starten gewollt gruen und tragen dann 'ERHALTUNG: <grund>' statt eines Messwerts. Bei Aenderung IMMER kimi/build-report.schema.json mitziehen.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "status": { "enum": ["complete", "partial", "blocked"] },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "predicate": { "type": "string" },
+          "cwd": { "type": "string" },
+          "measured": { "type": "string" },
+          "target": { "type": "string" },
+          "red_witness": { "type": "string" },
+          "fired_rule": { "type": "string" },
+          "green_first": { "type": "string" },
+          "red_before": { "type": "string" }
+        },
+        "required": ["predicate", "cwd", "measured", "target", "red_witness", "fired_rule", "green_first", "red_before"]
+      }
+    },
+    "how_verified": { "type": "string" },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": ["string", "null"] }
+  },
+  "required": ["status", "files_changed", "checks", "how_verified", "open_questions", "notes"]
+}

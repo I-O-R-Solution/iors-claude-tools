@@ -1,0 +1,31 @@
+{
+  "$comment": "MFJS-Spiegel von ../build-report.schema.json - bei Aenderung BEIDE anfassen. Moonshot validiert Tool-Schemata gegen MFJS: Typ-Unions sind verboten, jedes enum braucht ein begleitendes type. null wird hier zu leerem String. red_before (Pflicht seit 17.08.2026, Prozess-Audit): was derselbe Check am UNBERUEHRTEN Stand vor DIESEM Bau gemessen hat - er muss dort ROT sein. Erhaltungs-Praedikate, die gewollt gruen starten, tragen 'ERHALTUNG: <grund>' statt eines Messwerts.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "status": { "type": "string", "enum": ["complete", "partial", "blocked"] },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "predicate": { "type": "string" },
+          "cwd": { "type": "string" },
+          "measured": { "type": "string" },
+          "target": { "type": "string" },
+          "red_witness": { "type": "string" },
+          "fired_rule": { "type": "string" },
+          "green_first": { "type": "string" },
+          "red_before": { "type": "string" }
+        },
+        "required": ["predicate", "cwd", "measured", "target", "red_witness", "fired_rule", "green_first", "red_before"]
+      }
+    },
+    "how_verified": { "type": "string" },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  },
+  "required": ["status", "files_changed", "checks", "how_verified", "open_questions", "notes"]
+}

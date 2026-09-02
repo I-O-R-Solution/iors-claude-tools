@@ -13,6 +13,7 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 | `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Works on both levels: `global` argument reviews `~/.claude/CLAUDE.md`, a path argument reviews a project file. Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
 | `/prepare-session` | Context-Engineer. Generates a copy-ready session prompt for a topic/feature with code context, gap analysis, guardrails. Saves to `.planning/session-prompts/`. |
 | `/ende` | Session-end protocol. Thin pointer to the `session-ende` skill (single source of truth). Use when you want a guaranteed slash-command trigger. |
+| `/kimi` | Forwards a task to the Kimi K3 worker (`skills/route/kimi-worker.sh`). Modes `chat` (default, read-only), `--write` (build), `--resume`. Needs a Moonshot key in `~/.claude/.kimi-key`. Kimi runs outside the EU; the guards in `kimi-guards.sh` block `recht/` and `.env` trees on purpose. |
 | `/spark` | Quality-First project bootstrap. Slash-trigger for the `spark` skill — pre-fills Phase 0 from any text passed after the command (project name, migration hint, or rich description). |
 
 ### Skills
@@ -42,6 +43,10 @@ Copy-Item commands\spark.md              "$HOME\.claude\commands\"
 Copy-Item commands\prepare-session.md    "$HOME\.claude\commands\"
 Copy-Item commands\claudemd-optimize.md  "$HOME\.claude\commands\"
 Copy-Item -Recurse -Force skills\spark   "$HOME\.claude\skills\"
+# optional, nur fuer den route-Loop (siehe Skills-Tabelle):
+# Copy-Item commands\kimi.md "$HOME\.claude\commands\"
+# Copy-Item agents\kimi-worker.md "$HOME\.claudegents\"
+# Copy-Item -Recurse -Force skillsoute "$HOME\.claude\skills\"
 ```
 
 Danach Claude Code neu starten und mit `/einrichtung` beginnen.
@@ -79,6 +84,9 @@ cp commands/spark.md             ~/.claude/commands/
 cp commands/prepare-session.md   ~/.claude/commands/
 cp commands/claudemd-optimize.md ~/.claude/commands/
 cp -r skills/spark               ~/.claude/skills/   # includes references/ and scripts/
+# optional, route loop only (see skills table):
+# cp commands/kimi.md ~/.claude/commands/ && cp agents/kimi-worker.md ~/.claude/agents/
+# cp -r skills/route ~/.claude/skills/
 ```
 
 Restart Claude Code, then start with `/einrichtung`.
@@ -152,6 +160,16 @@ Or trigger via natural language: "neues Projekt anlegen", "scaffold", "bootstrap
 
 The skill runs through 5 phases: mode detection → depth check → confirmation → write (with conflict-safe idempotent merge) → quality gates → auto-review of the generated `CLAUDE.md`.
 
+### `/route` and the `route` skill
+
+```
+/route                                # boss interviews, plans, one critique, Sol builds, boss reviews
+/kimi <frage>                         # read-only second opinion from Kimi K3
+/kimi --write --slug <name> <auftrag> # Kimi may edit files; guards block recht/ and .env trees
+```
+
+Runtime lives in `skills/route/`: `worker.sh` (provider-blind, profile in `profiles/`), `preflight.sh`, `kimi-worker.sh` (thin alias), `schemas/` (build-report, plan-critique), `tests/` (T4 env guard, T8 resume, T9 riegel, edge/zone tests), `tools/` (context-zone meter, edge measurement). Read `skills/route/SKILL.md` first; it is the single source of truth for the loop.
+
 ### `/ende` and the `session-ende` skill
 
 The skill is the single source of truth for the protocol. The slash-command is a thin pointer to it.
@@ -161,6 +179,7 @@ The skill is the single source of truth for the protocol. The slash-command is a
 ```
 
 Or trigger via natural language: "Schluss", "Ende", "Feierabend", "Feierabend fuer heute" etc. (full trigger list in `skills/session-ende/SKILL.md`).
+| `route` | `/route` / "route this" / "run the route loop" | One-pass build loop with two model families: the boss session (Claude) interviews, plans once, gets ONE adversarial critique, then GPT-5.x Sol (Codex) builds and the boss reviews the artefact. Kimi K3 adds a cross-family second opinion on RISIKO/GROSS runs. Ships its own worker runtime (`worker.sh`, profiles for kimi/deepseek, JSON schemas, preflight, tests, context-zone tools). **Not part of the starter package.** Requirements: the `codex` Claude Code plugin with a logged-in Codex CLI, `~/.claude/.kimi-key` for Kimi, Git Bash on Windows, Python 3. Paths inside `worker.sh`, `preflight.sh`, `profiles/*.conf` and `tests/` are hard-coded to `C:/Users/User/.claude/skills/route` (Git-Bash shim does not convert arguments) — replace with your own home before the first run. `LESSONS.md` and `KOSTEN.md` carry the measured run history the skill reads in Step 2. |
 
 If the natural-language trigger ever fails to fire, fall back to `/ende`.
 

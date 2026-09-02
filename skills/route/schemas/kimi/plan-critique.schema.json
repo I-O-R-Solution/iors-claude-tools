@@ -1,0 +1,34 @@
+{
+  "$comment": "MFJS-Spiegel von ../plan-critique.schema.json - bei Aenderung BEIDE anfassen. Moonshot validiert Tool-Schemata gegen MFJS: Typ-Unions sind verboten, jedes enum braucht ein begleitendes type. null wird hier zu leerem String.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "verdict": { "type": "string", "enum": ["agree", "objections"] },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inspected": { "type": "array", "items": { "type": "string" } },
+        "not_inspected": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["inspected", "not_inspected"]
+    },
+    "new_objections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "severity": { "type": "string", "enum": ["blocker", "major", "minor"] },
+          "anchor_type": { "type": "string", "enum": ["repo", "spec", "plan"] },
+          "anchor": { "type": "string" },
+          "point": { "type": "string" },
+          "suggestion": { "type": "string" }
+        },
+        "required": ["severity", "anchor_type", "anchor", "point", "suggestion"]
+      }
+    },
+    "notes": { "type": "string" }
+  },
+  "required": ["verdict", "coverage", "new_objections", "notes"]
+}

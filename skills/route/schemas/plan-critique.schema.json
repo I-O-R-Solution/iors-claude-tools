@@ -1,0 +1,34 @@
+{
+  "$comment": "anchor_type/anchor binden jeden Befund an seine Herkunft: repo = file:line, spec = zitierte Zeile aus ## Spec, plan = Abschnitt. Nur repo/spec verlaengern die Konvergenz - plan-verankerte Befunde sind der Loop im Streit mit der eigenen letzten Aenderung. coverage macht die Erdung pruefbar. Bei Aenderung IMMER kimi/plan-critique.schema.json mitziehen.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "verdict": { "enum": ["agree", "objections"] },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inspected": { "type": "array", "items": { "type": "string" } },
+        "not_inspected": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["inspected", "not_inspected"]
+    },
+    "new_objections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "severity": { "enum": ["blocker", "major", "minor"] },
+          "anchor_type": { "enum": ["repo", "spec", "plan"] },
+          "anchor": { "type": "string" },
+          "point": { "type": "string" },
+          "suggestion": { "type": ["string", "null"] }
+        },
+        "required": ["severity", "anchor_type", "anchor", "point", "suggestion"]
+      }
+    },
+    "notes": { "type": ["string", "null"] }
+  },
+  "required": ["verdict", "coverage", "new_objections", "notes"]
+}
