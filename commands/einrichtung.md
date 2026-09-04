@@ -32,7 +32,15 @@ entstehen Zeilen, die etwas aendern.
      STREICHTEST: "For each line, ask: 'Would removing this cause Claude to make
      mistakes?' If not, cut it. Bloated CLAUDE.md files cause Claude to ignore your
      actual instructions!" — Das ist das einzige belegte Pruefkriterium pro Zeile.
+     Verschaerft durch: "Ruthlessly prune. If Claude already does something correctly
+     without the instruction, delete it or convert it to a hook."
      ACHTUNG: Der Name "Golden Rule" steht in KEINER der beiden Seiten. Nicht so nennen.
+     Sekundaerquellen sagen Aehnliches ("Ruthlessly edit your CLAUDE.md over time",
+     howborisusesclaudecode.com) — das ist BEHAUPTET, nicht belegt, und stuetzt nichts.
+
+     DER STREICHTEST GILT AUCH FUER DIESEN ABLAUF SELBST: Eine Frage, deren Antwort keine
+     Zeile erzeugt, die den Test bestuende, gehoert hier nicht hin. Jede der Fragen unten
+     ist einzeln daran gemessen worden. Wer eine neue hinzufuegt, misst sie genauso.
 
      AUFNAHME: "Add to it when: Claude makes the same mistake a second time ... You type
      the same correction or clarification into chat that you typed last session."
@@ -55,9 +63,18 @@ entstehen Zeilen, die etwas aendern.
      paths:-Frontmatter laden sie aber genauso mit — sie sparen nichts, sie ordnen nur.
 
      SPEZIFITAET: "Use 2-space indentation" statt "Format code properly"; "concrete
-     enough to verify". Betonung ist erlaubt: "You can tune instructions by adding
-     emphasis (e.g., 'IMPORTANT' or 'YOU MUST') to improve adherence" — eine Obergrenze
-     dafuer nennt die Doku NICHT.
+     enough to verify". Die aeltere Seite erlaubt Betonung: "You can tune instructions by
+     adding emphasis (e.g., 'IMPORTANT' or 'YOU MUST') to improve adherence" — eine
+     Obergrenze nennt sie nicht. Siehe BETONUNG direkt darunter.
+
+     BETONUNG, Stand Claude 5 (nachgetragen 2026-09-04): Der Prompting-Guide fuer Claude
+     Fable 5 und Opus 5 (platform.claude.com/docs/en/build-with-claude/prompt-engineering/)
+     raet von aggressiver Betonung in Grossbuchstaben ab — sie loest Ueberreaktionen aus —
+     und verlangt, jeder Anweisung ihren Grund mitzugeben ("Give the reason, not only the
+     request"). Fuer die Claude-5-Modelle ueberholt das die Emphasis-Zeile oben. Dieselbe
+     Quelle: Selbstpruef-Anweisungen ("verify your work") kosten Token ohne Gewinn.
+     Abschnitte dort: "Give the reason, not only the request", "Task scope and
+     over-verification".
 
      NACHWEIS: "/context and check the list under Memory files to verify your CLAUDE.md
      ... loaded."
@@ -69,8 +86,8 @@ entstehen Zeilen, die etwas aendern.
 
 **Ton.** Antworte in der Sprache des Users. Zielgruppe sind Einsteiger ohne
 Programmierkenntnisse. Kurze Saetze. Die Woerter *Hook*, *Rule*, *Skill*, *Scope*,
-*Kontext* kommen im Gespraech NICHT vor — nur in `einrichtung-offen.md`, und dort
-erklaert.
+*Kontext* kommen im Gespraech nicht vor — ein Einsteiger kennt sie nicht, und jedes
+davon kostet ihn den Faden. Nur in `einrichtung-offen.md`, und dort erklaert.
 
 ---
 
@@ -94,7 +111,7 @@ erklaert.
 
    | Thema | geregelt in |
    |---|---|
-   | Beruf des Users und an wen seine Texte gehen | |
+   | Beruf des Users und an wen seine fertigen Ergebnisse gehen | |
    | Antwortsprache, Ton und Antwortlaenge | |
    | Wie in seinem Haus geschrieben wird (Anrede, Aufbau, Grussformel) | |
    | Welche Abkuerzungen und Hausbegriffe bei ihm was bedeuten | |
@@ -102,8 +119,8 @@ erklaert.
    | Welche Angaben in keinem Beispiel und keiner Vorlage stehen duerfen | |
    | Was zu tun ist, wenn eine Angabe zur Aufgabe fehlt | |
    | Aus welchem Programm oder Ordner seine Arbeitsdaten stammen | |
-   | Woran der User erkennt, dass ein Text fertig ist | |
-   | Was er mit dem Ergebnis macht (Outlook, Word, Ausdruck) | |
+   | Was in einem fertigen Ergebnis immer drinstehen muss | |
+   | Wo das Ergebnis landet und ob dort Formatierung hingehoert | |
 
    **Im Zweifel gilt ein Thema als NICHT geregelt.** Der Filter darf nur greifen, wenn die
    gefundene Stelle dieselbe Sache meint, nicht nur ein aehnliches Wort benutzt. Eine
@@ -149,9 +166,12 @@ ist nicht gemessen:
 - *"Ausfuehrlich"* → **VOLLLAUF**: alle vier Bloecke, mit einem Beispieltext
 
 **Nenne die Fragenzahl erst NACH dem Bestandsfilter — und nur die, die wirklich kommen.**
-Ungefiltert waeren es 10, 17 und 19; wie viele davon uebrig bleiben, ergibt erst der
-Abgleich mit der Themenliste aus Schritt 0. Rechne das aus, bevor du eine Zahl nennst.
-Eine angesagte Zahl, die dann nicht stimmt, ist schlimmer als gar keine.
+Ungefiltert waeren es 10, 15 und 17 (Block A 5 · Block B 2 · Block C 5 · Block D 5, weil
+D1 und D2 ein Schritt sind). Dazu kommt in MITTELLAUF und VOLLLAUF **eine** Nachfrage nach
+dem Schreiben — die zaehlst du getrennt und sagst sie erst dort an. Wie viele der Fragen
+uebrig bleiben, ergibt erst der Abgleich mit der Themenliste aus Schritt 0. Rechne das aus,
+bevor du eine Zahl nennst. Eine angesagte Zahl, die dann nicht stimmt, ist schlimmer als
+gar keine. Im Modus WARTUNG kommen W1 und W2 dazu — **zaehl sie mit**, sie laufen immer.
 
 **Kuendige vor jedem Block die verbleibende Zahl an** ("Block C: drei Fragen, danach
 kannst du aufhoeren"). Ein User, der nicht weiss, wie viel noch kommt, steigt in der Mitte
@@ -181,8 +201,9 @@ Ein Klick auf *"Passt, weiter"* ist ausdruecklich KEIN Abbruchsignal, sondern Zu
 Bei Verdacht nicht still abbrechen, sondern einmal nachfragen: *"Sollen wir hier
 aufhoeren und das Bisherige sichern?"*
 
-**HARTE REGEL: Aus einer Nicht-Antwort wird NIE eine Zeile.** Einzige Ausnahme: die
-Antwortsprache darf aus dem Gespraech abgeleitet werden — und du sagst, dass du das tust.
+**Aus einer Nicht-Antwort wird keine Zeile** — sie haette keine Herkunft, und geraten ist
+schlechter als leer. Einzige Ausnahme: die Antwortsprache darf aus dem Gespraech
+abgeleitet werden — und du sagst, dass du das tust.
 
 ---
 
@@ -223,9 +244,20 @@ Offene Chat-Fragen:
 
 - **A1** "Was steht auf deiner Visitenkarte — und was machst du davon an einem normalen
   Dienstag wirklich?"
-- **A2** "An wen gehen deine Texte meistens: Privatkunde, Firmenkunde, Werkstatt,
-  Hersteller, Versicherung?"
-- **A3** "Siezt oder duzt ihr eure Kunden — und wie redet ihr intern miteinander?"
+  **Die zweite Haelfte ist die wichtigere.** Sie liefert nicht nur die Zeile, sondern das
+  Material, mit dem du alle folgenden Fragen bebilderst. Bleibt die Antwort beim Titel,
+  hak einmal nach: *"Und was landet an so einem Dienstag konkret auf deinem Tisch?"*
+  Frag NIE, wofuer er Claude benutzen will — das ist der Allgemeinplatz, den dieser Ablauf
+  im Kern vermeidet, und die Antwort erzeugt eine Zeile ohne Wirkung.
+- **A2** "An wen gehen deine fertigen Ergebnisse — Kunden, Kollegen, Auftraggeber,
+  Behoerden? Oder bleiben sie bei dir?"
+  Frag nach den Empfaengern seiner **bestehenden** Arbeit, nie danach, was mit Claude
+  herauskommen soll: Wer Claude gestern installiert hat, kann das nicht beantworten.
+- **A3** "Wenn du beruflich jemandem schreibst — wie faengst du an, und wie hoerst du auf?"
+  Frag NIE offen, wie Claude mit ihm reden soll. Darauf kommen Stimmungswoerter wie
+  "sachlich" oder "locker": nicht pruefbar, also genau die Sorte Zeile, die dieser Ablauf
+  verbietet. Anrede und Grussformel dagegen sind Wortlaut. Was Claude im Umgangston angeht,
+  deckt A4 mit einer Zahl ab.
 
 Als Auswahl:
 
@@ -233,12 +265,19 @@ Als Auswahl:
   einer halben Seite. Frage: *"Welche haettest du lieber, und was fehlt der kurzen?"*
   Frag NIE "wie lang sollen Antworten sein" — darauf sagt jeder "kurz" und meint es nicht.
   Aus der Antwort muss eine ZAHL werden ("hoechstens fuenf Saetze").
-- **A5** "Was machst du mit dem Ergebnis — in Outlook einfuegen, in Word weiterbearbeiten,
-  ausdrucken?"
+- **A5** "Wo landet das Ergebnis, wenn du fertig bist — und darf da Formatierung mit rein?"
+  Der Ort allein aendert nichts; "bleibt im Fenster" erzeugt eine folgenlose Zeile. Tragend
+  ist die Folge: Wer die Antwort in ein Mailprogramm kopiert, will keine Sternchen und
+  Rauten im Kundentext. Frag beides im selben Zug, sonst faellt die Formatregel weg.
 
 Die Antworten aus A liefern die Beispiele, mit denen du **jede** spaetere offene Frage
 bebilderst. Ohne Beispiel aus seiner eigenen Welt friert ein Einsteiger bei einer offenen
 Frage ein.
+
+**Bebildere aus SEINEM Beruf, nie aus einem geliehenen.** Die Beispiele in diesem Ablauf
+stammen ueberwiegend aus einem Autohaus, weil dort jede Regel anschaulich wird. Sie sind
+Anschauung fuer dich, nicht Vorlage fuer das Gespraech. Sagt A1 "Physiotherapeutin", reden
+alle folgenden Fragen von Befundberichten, nicht von Kostenvoranschlaegen.
 
 **Faellt Block A dem Bestandsfilter zum Opfer, nimm die Beispiele aus dem Bestand** —
 Rolle, Empfaengerkreis und Anrede stehen dann ja bereits in der Kette. Ein uebersprungener
@@ -248,16 +287,24 @@ Block A darf nie dazu fuehren, dass spaetere Fragen unbebildert gestellt werden.
 
 Vorsatz: *"Wie ihr schreibt, kann ich nicht raten — ich kann es nur ablesen."*
 
-- **B1** "Kopier mir EINEN Text herein, den du letzte Woche verschickt hast und mit dem du
-  zufrieden warst. Umbrueche stoeren nicht."
-  **Die Anonymisierung buerdest du NICHT dem User auf.** Sag zu: *"Namen, Kennzeichen und
-  Nummern ersetze ich beim Lesen durch Platzhalter — die landen in keiner Datei."* Und halte
-  das ein. Frag nicht nach einem Dateipfad; ein Serviceberater weiss nicht, was das ist.
-- **B2** "Und ein Text, bei dem dich jemand korrigiert hat — was war der Vorwurf?"
+- **B1** "Kopier mir EIN fertiges Ergebnis aus deiner Arbeit herein, mit dem du zufrieden
+  warst. Mail, Bericht, Angebot, Protokoll — was bei dir anfaellt. Umbrueche stoeren nicht."
+  **Die Anonymisierung buerdest du nicht dem User auf** — sie ist deine Arbeit, seine
+  waere die Huerde, an der er den Text gar nicht erst einfuegt. Sag zu: *"Namen, Nummern und
+  Kennzeichen ersetze ich beim Lesen durch Platzhalter — die landen in keiner Datei."* Und
+  halte das ein. Frag nicht nach einem Dateipfad; wer Claude gestern installiert hat, weiss
+  nicht, was das ist.
+- **B2** "Und eins, bei dem dich jemand korrigiert hat — was war der Vorwurf?"
+  **B2 faengt, was kein anderer Block faengt.** Nicht jeder Vorwurf ist eine Zusage (D2)
+  oder eine verbotene Angabe (D4): "Du hast einen Verdacht als gesicherte Diagnose
+  formuliert" ist beides nicht und trotzdem die teuerste Zeile, die dieser Ablauf holen
+  kann. Frag auch dann, wenn D2 und D4 schon gelaufen sind.
 
 Aus B1 leitest du **3 bis 6 beobachtete** Konventionen ab, jede mit der Stelle, an der sie
-sichtbar ist (Anrede, Laenge, Grussformel, Reihenfolge, Umgang mit Preisen). Der User hakt
-nur ab oder streicht. Aus B2 entstehen Verbotszeilen.
+sichtbar ist (Anrede, Grussformel, Reihenfolge, Umgang mit Zahlen und Preisen). Der User
+hakt nur ab oder streicht. **Leite aus B1 KEINE Laengenregel ab** — die steht schon aus A4
+mit einer Zahl da, und zwei Laengenregeln nebeneinander widersprechen sich.
+Aus B2 entstehen Verbotszeilen.
 
 Wird der Block uebersprungen, **benenne das im Abschluss** ("Formregeln fehlen, weil kein
 Beispieltext vorlag") — nicht stillschweigend auslassen.
@@ -271,11 +318,23 @@ Offene Chat-Fragen, jede mit einem Beispiel aus Block A bebildert:
 
 - **C1** "Ein neuer Kollege faengt bei dir an. Was erklaerst du ihm am ersten Tag, weil er
   es sonst garantiert falsch macht?"
-- **C2** "Was musstest du deinem letzten Neuen ZWEIMAL sagen?"
-- **C3** "Welche drei Abkuerzungen benutzt ihr taeglich, die ein Aussenstehender nicht
-  kennt?"
+  **Im KURZLAUF ist das die einzige Frage, die eine Freigabe-Regel holen kann** — Block D
+  laeuft dort nicht. Wer allein arbeitet und nie jemanden eingearbeitet hat, beantwortet
+  sie hypothetisch; das ist ausdruecklich erlaubt und liefert trotzdem echte Zeilen.
+- **C2** "Was musstest du zuletzt jemandem ZWEIMAL sagen — einem Neuen, einer Vertretung,
+  einem Dienstleister, einem Kunden?"
+  Der geoeffnete Adressatenkreis ist Absicht: "dein letzter Neuer" setzt Personal voraus,
+  und wer keins hat, erfindet dann etwas.
+- **C3** "Gibt es Abkuerzungen oder Namen, die nur in eurem Haus so benutzt werden?"
+  Frag NICHT nach dem, was ein Aussenstehender nicht kennt — branchenuebliche Kuerzel kennt
+  Claude, hausinterne nicht. Und nenne KEINE Anzahl: eine Quote zwingt zum Auffuellen mit
+  Kuerzeln, die niemand braucht.
 - **C4** "Welche zwei Dinge werden bei euch staendig verwechselt — auch von Kollegen?"
 - **C5** "Gibt es ein Wort, das viele benutzen, das bei euch aber falsch ist?"
+  **C5 ist keine Dublette von C4.** C4 braucht ein Paar; C5 faengt das Einzelwort ohne
+  Gegenstueck — bei einem Bestattungshaus heisst es nicht "Kunde", sondern "Angehoerige",
+  und dazu gibt es kein Verwechslungspaar. Solche Woerter fehlen auch im vorbildlichen
+  Beispieltext aus Block B, gerade weil sie dort vermieden wurden.
 
 C2 ist die **Uebertragung** des Doku-Aufnahmetriggers auf menschliche Einarbeitung — die
 Doku meint Korrekturen an Claude, nicht an Kollegen. Nenne das so, wenn es zur Sprache
@@ -289,20 +348,34 @@ seiner Formulierung zur Regel sieht.
 Vorsatz: *"Fehlt mir eine Zahl, koennte ich die Luecke hilfsbereit mit einem plausiblen
 Wert fuellen. Welche Felder das nicht vertragen, weisst nur du."*
 
-- **D1** "Welche Zahlen in deinem Alltag darf niemand ausser einer bestimmten Person
-  festlegen — und wer ist das?"
-- **D2** "Welche Zusage darfst du selbst nicht machen — Termin, Garantie, Kulanz,
-  Lieferzeit?"
+- **D1 + D2 sind EIN Schritt, nicht zwei.** Stell D1, und haeng D2 als Nachfrage an die
+  Antwort. Das kostet den User eine Frage und liefert zwei Zeilen.
+  - **D1** "Welche Zahlen oder Werte darf ich nie schaetzen, auch nicht plausibel — und
+    woher kommen sie richtig?"
+  - **D2** "Und welche Zusage darf in keinem Ergebnis stehen, bevor jemand sie geprueft
+    hat?" D1 faengt Zahlen; D2 faengt die Zusagen **ohne** Zahl — Machbarkeit, Fristen,
+    Garantie, Kulanz. Das ist die teuerste Zeile des ganzen Ablaufs, und sie faellt weg,
+    wenn du nur D1 stellst.
 - **D3** "Woher kommen die Angaben, mit denen du arbeitest — welches Programm, welcher
   Ordner?"
+  **Diese Frage ist nicht redundant zu D1.** D1 und D5 greifen, wenn eine Angabe **fehlt**
+  oder **erfunden** wird. D3 greift, wenn sie **aus der falschen Quelle** kommt — die alte
+  Preisliste auf der Platte statt dem Portal, der Kilometerstand aus der Kundenmail statt
+  aus dem System. Dabei wird nichts geschaetzt, und trotzdem steht eine falsche Zahl im
+  Ergebnis.
 - **D4** "Welche Angaben duerfen in keinem Beispiel und keiner Vorlage stehen?"
-- **D5** "Bei welcher Sorte fehlender Angabe soll ich stehenbleiben — und wo darf ich
-  selbst entscheiden?"
-- **D6** "Woran erkennst DU, dass ein Text fertig ist — was pruefst du als Letztes?"
-- **D7** "Welche Aufgabe machst du jede Woche gleich, in mehreren Schritten nacheinander?"
+- **D5** "Was darf ich ohne Rueckfrage selbst entscheiden — Formulierung, Reihenfolge,
+  Betreff?"
+  Frag nur nach der **Erlaubnis**, nicht mehr danach, wo du stehenbleiben sollst: Die
+  Stopp-Haelfte entsteht schon aus D1 und D2. Beides zusammen gefragt erntet die Platitude
+  "bei allem Wichtigen nachfragen", und die verhindert keinen Fehler.
+- **D6** "Was muss in einem fertigen Ergebnis dieser Art IMMER drinstehen?"
+  Frag NICHT, was er als Letztes prueft. Das erntet Rituale — "nochmal drueberlesen",
+  "eine Nacht drueber schlafen" —, die Claude nicht ausfuehren kann. Der Pflichtteil
+  dagegen ist eine Liste, die sich abhaken laesst.
 
-D7 erzeugt bewusst KEINE Zeile in der Datei, sondern einen Eintrag in der offenen Liste —
-mehrschrittige Ablaeufe gehoeren laut Doku nicht in die CLAUDE.md.
+**Eine siebte Frage gehoert hierher, kommt aber spaeter** — siehe Schritt 11a. Sie erzeugt
+keine Zeile, und am Ende des laengsten Blocks steigen Leute aus. Kuendige sie hier NICHT an.
 
 **Wird Block D uebersprungen (KURZLAUF), sag diesen Satz woertlich:** *"Was du NICHT
 entscheiden darfst — Preise, Zusagen, Kundendaten — haben wir heute nicht besprochen. Bis
@@ -373,9 +446,9 @@ Halte jede Kandidatenzeile gegen die in Schritt 0 gelesene Kette: Ist dasselbe T
 geregelt? Bei Treffer zeigst du dem User **beide Zeilen als Paar** — alte und neue — und
 fragst: gilt die neue zusaetzlich, oder ersetzt sie die alte?
 
-Bei *ersetzt*: Die alte Zeile wird trotzdem NICHT geloescht (siehe harte Regeln). Notiere
-sie stattdessen in `einrichtung-offen.md` unter "Streichkandidaten" und sag dem User, dass
-er sie selbst entfernen muss.
+Bei *ersetzt*: Die alte Zeile wird trotzdem nicht geloescht — entfernen darf nur der
+User, der sie freigegeben hat. Notiere sie stattdessen in `einrichtung-offen.md` unter
+"Streichkandidaten" und sag ihm, dass er sie selbst entfernen muss.
 
 Belegt: *"if two rules contradict each other, Claude may pick one arbitrarily."* Ein
 Widerspruch ist schlimmer als eine fehlende Regel.
@@ -387,11 +460,19 @@ Widerspruch ist schlimmer als eine fehlende Regel.
 - **Jede Zeile enthaelt einen Wortlaut, eine Zahl, einen Namen, einen Befehl oder einen
   Pfad.** Sonst zurueck mit einer konkretisierenden Frage: "kurz halten" → "hoechstens wie
   viele Zeilen?" Doku-Massstab: *concrete enough to verify*.
+- **Jede Verbotszeile traegt ihren Grund im selben Satz.** "Keine Zahl ohne Quelle —
+  sonst wird sie meine Zusage" statt "Keine Zahl ohne Quelle". Ein nacktes Verbot wird
+  als Reflex gelesen und trifft auch Faelle, fuer die es nie gedacht war. Wo eine
+  Positiv-Form dasselbe sagt, ist sie die bessere: "Zahlen nur mit Quelle" statt "keine
+  Zahl ohne Quelle". *(Claude-5-Guide, Abschnitt "Give the reason, not only the request";
+  siehe BETONUNG in der Belegbasis oben.)*
 - **Eine Regel = ein Bullet** unter einer thematischen Ueberschrift. Keine Fliesstext-
   Absaetze mit mehreren Regeln.
-- **Betonung** (`IMPORTANT`, Grossbuchstaben) nur auf Zeilen, deren Bruch Geld, Kunden oder
-  Daten kostet. Sind es mehr als eine Handvoll, ist die Datei zu voll — nicht die Betonung
-  zu knapp. *(Eine Obergrenze nennt die Doku nicht; dass Betonung wirkt, ist belegt.)*
+- **Keine Betonung in Grossbuchstaben** (`IMPORTANT`, `YOU MUST`). Fuer die aelteren
+  Modelle belegte die Doku, dass Betonung die Befolgung erhoeht; fuer die Claude-5-Modelle
+  sagt der Guide, dass sie Ueberreaktionen ausloest. Gewicht bekommt eine Zeile durch
+  ihren Grund und ihre Stelle in der Datei, nicht durch die Schrift. Faellt dem User eine
+  Zeile ein, "die wirklich wichtig ist": ihren Grund schaerfen, nicht ihre Schreibweise.
 - **Kontingent: hoechstens 15 neue Zeilen pro Durchgang.** Ueberschuss wandert in die
   offene Liste. **Sag im Chat dazu, dass diese Zahl eine Setzung ist, kein Doku-Fakt** —
   belegt ist nur die Zielmarke von unter 200 Zeilen pro Datei.
@@ -400,9 +481,11 @@ Widerspruch ist schlimmer als eine fehlende Regel.
   *"Heisst das: ich werde ab jetzt ...?"* Nur diese Rueckwaertslesung faengt die Umkehr.
   *(Eine Vorfassung dieses Ablaufs schrieb abgefragte Verbote unter die Ueberschrift
   `# Immer` — aus "nie Preise festlegen" wurde eine Daueranweisung, Preise festzulegen.)*
-- **DATENHYGIENE-GUARD.** Kandidatenzeilen aus Block B gegen echte Namen, Kennzeichen,
-  Fahrgestell- und Telefonnummern pruefen und durch Platzhalter ersetzen. Was aus einem
-  eingefuegten Text stammt, darf nie roh in eine Datei, die in jedem Ordner mitlaedt.
+- **DATENHYGIENE-GUARD.** Kandidatenzeilen aus Block B gegen echte Personennamen, Adressen,
+  Telefonnummern, Aktenzeichen, Vorgangs- und Vertragsnummern, Kennzeichen und
+  Geburtsdaten pruefen und durch Platzhalter ersetzen. Die Liste ist nicht abschliessend:
+  pruef alles, was eine einzelne Person oder einen einzelnen Vorgang identifiziert. Was aus
+  einem eingefuegten Text stammt, darf nie roh in eine Datei, die in jedem Ordner mitlaedt.
 
 ---
 
@@ -460,7 +543,23 @@ vollstaendig; der Bestand muesste durch deine Hand rekonstruiert werden, und dab
 zuverlaessig etwas verloren oder wird stillschweigend umformuliert. `Edit` fasst nur an,
 was du ausdruecklich benennst.
 
-Importierte Dateien (`@`-Zeilen) werden NIE geschrieben.
+Importierte Dateien (`@`-Zeilen) werden nicht geschrieben — sie sind Bestand, den dieser
+Ablauf nur liest.
+
+---
+
+## Schritt 11a — Die letzte Frage, nach dem Schreiben
+
+Nur in MITTELLAUF und VOLLLAUF. Die Datei steht jetzt; alles ab hier ist Zugabe, und wer
+sie nicht mehr beantworten will, hat nichts verloren. Kuendige sie so an: *"Eine letzte
+Frage — sie aendert an deiner Datei nichts mehr."*
+
+- **D7** "Welche Aufgabe machst du jede Woche gleich, in mehreren Schritten nacheinander?"
+
+D7 erzeugt bewusst KEINE Zeile in der Datei, sondern einen Eintrag in der offenen Liste —
+mehrschrittige Ablaeufe gehoeren laut Doku nicht in die CLAUDE.md. Sie steht hier hinten,
+weil sie am Ende von Block D genau die Abbruchstelle getroffen hat, an der Leute aussteigen:
+lange Fragenreihe, und dann eine Frage, die nichts zur Datei beitraegt.
 
 Danach `Write` auf `~/.claude/einrichtung-offen.md` — nur wenn nicht leer. Existiert sie
 schon, mit Datums-Ueberschrift **anhaengen** statt ueberschreiben.
@@ -500,7 +599,8 @@ Zum Schluss die Wachstumsregel — der wichtigste Satz des ganzen Ablaufs:
 
 > *"Wenn dieselbe Korrektur zum zweiten Mal noetig ist, wird sie eine Zeile. Sag dann
 > einfach 'schreib das in meine CLAUDE.md'. Und ruf einmal im Monat
-> `/claudemd-optimize global` auf."*
+> `/claudemd-optimize global` auf. Fuer den ersten richtigen Auftrag in einem Projekt:
+> `/prompt` tippen und einfach drauflosreden."*
 
 Ein weiterer Durchgang ist schlicht wieder `/einrichtung`, dann im Modus WARTUNG.
 
@@ -522,7 +622,7 @@ Kopf-Kommentar mit Datum, Herkunftssatz, Wachstumsregel. Leere Ueberschriften en
 # Wie in meinem Haus geschrieben wird
 # Woerter, die bei uns etwas Bestimmtes heissen
 # Zahlen und Zusagen, die mir nicht gehoeren
-# Was in keinen Text kommt
+# Was in kein Ergebnis kommt
 # Wie du mit Luecken umgehst
 # Woher die Angaben kommen
 # Wann etwas fertig ist
@@ -531,10 +631,16 @@ Kopf-Kommentar mit Datum, Herkunftssatz, Wachstumsregel. Leere Ueberschriften en
 <!-- Projektregeln gehoeren nicht hierher — dafuer /spark im jeweiligen Ordner. -->
 ```
 
-Zuordnung: `Ueber mich` aus A1/A2 · `So antwortest du mir` aus A3/A4 · `Wie in meinem Haus
-geschrieben wird` nur aus Block B · `Woerter` aus C3/C4/C5 · `Zahlen und Zusagen` aus
-D1/D2 · `Was in keinen Text kommt` aus D4 · `Wie du mit Luecken umgehst` aus D5 · `Woher
-die Angaben` aus D3 · `Wann etwas fertig` aus D6 · `Was ich mit dem Ergebnis mache` aus A5.
+Zuordnung: `Ueber mich` aus A1/A2 · `So antwortest du mir` **nur aus A4** (die Zahl) ·
+`Wie in meinem Haus geschrieben wird` aus A3 und Block B — A3 setzt Anrede und Grussformel,
+Block B bestaetigt oder schaerft sie am echten Beispiel und erzeugt KEINE zweite Zeile
+dafuer · `Woerter` aus C3/C4/C5 · `Zahlen und Zusagen` aus D1/D2 · `Was in kein Ergebnis
+kommt` aus D4 und aus dem Vorwurf in B2 · `Wie du mit Luecken umgehst` aus D5 · `Woher die
+Angaben` aus D3 · `Wann etwas fertig` aus D6 · `Was ich mit dem Ergebnis mache` aus A5,
+samt der Formatregel aus derselben Antwort.
+
+C1 und C2 speisen je nach Antwort mehrere Ueberschriften — sortiere sie nach Inhalt, nicht
+nach Herkunft. D7 speist keine, sie geht in die offene Liste.
 
 Stammen Zeilen aus dem KURZLAUF ohne Fehlererfahrung, markiere sie im Kopf-Kommentar als
 **Starthypothesen** — sie sind noch nicht am Doku-Aufnahmetrigger geprueft.
@@ -559,31 +665,45 @@ Der letzte Abschnitt nennt im KURZLAUF die ausgelassenen Bloecke namentlich. Bei
 
 ---
 
-## Harte Regeln fuer dich
+## Regeln fuer dich
 
-- **NIEMALS** eine bestehende `~/.claude/CLAUDE.md` ueberschreiben, umformulieren,
-  umsortieren oder kuerzen. Im Modus WARTUNG nur `Edit`, nie `Write`, und nur anhaengen.
-- **NIEMALS eine bestehende Zeile loeschen.** Streichkandidaten werden gezeigt und in
-  `einrichtung-offen.md` notiert; entfernen darf sie nur der User selbst.
-- **NIEMALS** eine importierte Datei (`@`-Zeile) schreiben. Sie wird gelesen, nie beruehrt.
-- **NIEMALS** eine Zeile ohne zitierbare Herkunft erzeugen. Leer ist besser als geraten.
-- **NIEMALS** aus einer Nicht-Antwort eine Zeile bauen.
-- **NIEMALS** echte Namen, Kennzeichen, Fahrgestell- oder Telefonnummern aus eingefuegtem
-  Material uebernehmen.
-- **NIEMALS** eine summierte Zeilen-Obergrenze ueber die Import-Kette als Doku-Fakt
-  behaupten. Belegt ist: unter 200 **pro Datei**.
-- **NIEMALS** Hooks, `permissions.deny`, Skills oder `~/.claude/rules/` automatisch
-  anlegen. Vorschlagen, begruenden, in `einrichtung-offen.md` notieren. *(Rules ohne
-  `paths:`-Frontmatter laden genauso mit und sparen nichts — Auslagern lohnt erst, wenn
-  eine EINZELNE Datei ueber 200 Zeilen liegt. Diese Zurueckhaltung ist eine Setzung.)*
-- **NIEMALS** `/doctor` empfehlen, ohne die Claude-Code-Version auf dem Rechner gemessen zu
-  haben — der Trim-Vorschlag existiert laut Changelog erst ab v2.1.206.
-- **NIEMALS** Zeitangaben in Minuten versprechen. Wie lange der Ablauf dauert, ist nicht
-  gemessen.
-- **NIEMALS** eine Befolgungsquote nennen. Belegt ist nur, dass CLAUDE.md Kontext ist und
-  keine Durchsetzung.
-- **IMMER** die vollstaendige Datei vor dem Schreiben zeigen und bestaetigen lassen.
-- **IMMER** jede Verbots- und Erlaubniszeile rueckwaerts vorlesen, bevor sie geschrieben wird.
-- **IMMER** den `/context`-Check zeigen — das Gespraech ist die Behauptung, `/context` der
+- Eine bestehende `~/.claude/CLAUDE.md` wird nicht ueberschrieben, umformuliert,
+  umsortiert oder gekuerzt; im Modus WARTUNG nur `Edit`, nur anhaengen — `Write`
+  ersetzt die ganze Datei, und beim Rekonstruieren des Bestands geht zuverlaessig
+  etwas verloren oder wird still umformuliert.
+- Eine bestehende Zeile wird nicht geloescht; Streichkandidaten werden gezeigt und in
+  `einrichtung-offen.md` notiert — der User hat sie einmal freigegeben, und was er
+  freigegeben hat, nimmt nur er zurueck.
+- Eine importierte Datei (`@`-Zeile) wird gelesen und nicht geschrieben — sie ist
+  Bestand, den dieser Ablauf nur mitliest, damit er nicht abfragt, was dort schon steht.
+- Keine Zeile ohne zitierbare Herkunft — leer ist besser als geraten.
+- Aus einer Nicht-Antwort wird keine Zeile — sie haette keine Herkunft, und
+  Umformulieren ist die getarnte Form des Erfindens.
+- Aus eingefuegtem Material wird nichts uebernommen, das eine einzelne Person oder einen
+  einzelnen Vorgang identifiziert — Name, Adresse, Telefonnummer, Aktenzeichen,
+  Vertrags- oder Vorgangsnummer, Kennzeichen, Geburtsdatum. Die Datei laedt in jedem
+  Ordner mit, also auch in jedem fremden Projekt.
+- Nicht offen fragen, wie Claude reden soll oder wofuer der User Claude einsetzen will —
+  beides erzeugt Allgemeinplaetze statt Zeilen. Gefragt wird nach seiner Arbeit.
+- Keine summierte Zeilen-Obergrenze ueber die Import-Kette als Doku-Fakt behaupten —
+  belegt ist: unter 200 **pro Datei**.
+- Hooks, `permissions.deny`, Skills oder `~/.claude/rules/` werden nicht automatisch
+  angelegt, sondern vorgeschlagen, begruendet und in `einrichtung-offen.md` notiert —
+  Rules ohne `paths:`-Frontmatter laden genauso mit und sparen nichts; Auslagern lohnt
+  erst, wenn eine einzelne Datei ueber 200 Zeilen liegt. Diese Zurueckhaltung ist eine
+  Setzung.
+- `/doctor` wird nur empfohlen, wenn die Claude-Code-Version auf dem Rechner gemessen
+  ist — der Trim-Vorschlag existiert laut Changelog erst ab v2.1.206.
+- Keine Zeitangaben in Minuten — wie lange der Ablauf dauert, ist nicht gemessen.
+- Keine Befolgungsquote — belegt ist nur, dass CLAUDE.md Kontext ist und keine
+  Durchsetzung.
+- Die vollstaendige Datei wird vor dem Schreiben gezeigt und bestaetigt — wer gerade
+  diktiert hat, dass nichts ohne seine Freigabe passiert, darf das nicht als Erstes
+  gebrochen sehen.
+- Jede Verbots- und Erlaubniszeile wird rueckwaerts vorgelesen, bevor sie geschrieben
+  wird — nur die Rueckwaertslesung faengt die Sinnumkehr, an der eine Vorfassung
+  gescheitert ist.
+- Der `/context`-Check wird gezeigt — das Gespraech ist die Behauptung, `/context` der
   Beleg.
-- **IMMER** bei Tor-4-Treffern laut sagen, dass es eine Bitte ist und kein Schloss.
+- Bei Tor-4-Treffern wird laut gesagt, dass es eine Bitte ist und kein Schloss — ohne
+  diesen Satz erzeugt der Ablauf falsche Sicherheit.
