@@ -12,6 +12,7 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 | `/check` | Multi-dimensional code review across Stabilitaet, Nachhaltigkeit, Effektivitaet, Staerke. Mandatory reuse-grep, severity-classified findings (KRITISCH/WICHTIG/KLEIN), controlled fix-flow — auto-fix only for KLEIN after explicit `j`, never for WICHTIG/KRITISCH. |
 | `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Works on both levels: `global` argument reviews `~/.claude/CLAUDE.md`, a path argument reviews a project file. Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
 | `/prepare-session` | Context-Engineer. Generates a copy-ready session prompt for a topic/feature with code context, gap analysis, guardrails. Saves to `.planning/session-prompts/`. |
+| `/prompt` | Turns a free, unsorted brain-dump into one commissioning prompt using Anthropic's four-block template (THE JOB / THE WHY / THE GUARDRAILS / DONE MEANS). Reads the repo and memory first, then asks at most five single questions — one per turn, only about gaps reading could not close. Runs eight greppable self-checks on the draft (no bare prohibitions, no ALL-CAPS emphasis, no self-verification instructions, a measurable exit criterion) and prints the prompt copy-ready in the chat. Self-contained; hands existing prompt files to `/prompt-audit` if you have it. |
 | `/ende` | Session-end protocol. Thin pointer to the `session-ende` skill (single source of truth). Use when you want a guaranteed slash-command trigger. |
 | `/kimi` | Forwards a task to the Kimi K3 worker (`skills/route/kimi-worker.sh`). Modes `chat` (default, read-only), `--write` (build), `--resume`. Needs a Moonshot key in `~/.claude/.kimi-key`. Kimi runs outside the EU; the guards in `kimi-guards.sh` block `recht/` and `.env` trees on purpose. |
 | `/spark` | Quality-First project bootstrap. Slash-trigger for the `spark` skill — pre-fills Phase 0 from any text passed after the command (project name, migration hint, or rich description). |
@@ -46,7 +47,8 @@ Copy-Item -Recurse -Force skills\spark   "$HOME\.claude\skills\"
 # optional, nur fuer den route-Loop (siehe Skills-Tabelle):
 # Copy-Item commands\kimi.md "$HOME\.claude\commands\"
 # Copy-Item agents\kimi-worker.md "$HOME\.claudegents\"
-# Copy-Item -Recurse -Force skillsoute "$HOME\.claude\skills\"
+# Copy-Item -Recurse -Force skills
+oute "$HOME\.claude\skills\"
 ```
 
 Danach Claude Code neu starten und mit `/einrichtung` beginnen.
@@ -95,6 +97,7 @@ Restart Claude Code, then start with `/einrichtung`.
 
 ```bash
 cp commands/check.md ~/.claude/commands/          # code review, self-contained
+cp commands/prompt.md ~/.claude/commands/         # brain-dump -> commissioning prompt, self-contained
 cp commands/ende.md  ~/.claude/commands/          # needs session-ende AND a memory setup
 cp -r skills/session-ende ~/.claude/skills/       # see the note in the skills table
 ```
