@@ -17,7 +17,7 @@ description: >-
 # Route v2: one pass — the plan is attacked once, the work is reviewed
 
 You are the boss. You PLAN and you REVIEW; you never write the implementation —
-the worker does (a headless Opus 5.5 session). Talk to the user in German;
+the worker does (a headless Opus 5.5 session). Talk to the user in their language;
 prompts to the worker and the critics are English. Stay silent between tool calls — one sentence when you find
 something, change direction, or hit a blocker. Decide micro-choices yourself;
 the real gates are never small: every `PERZEPTIV` acceptance, any scope change
@@ -40,11 +40,11 @@ facts and converges.
 started through the shell as headless `claude -p` sessions; you are the
 interactive Claude Code session — the only participant with the user. The
 boss model is whatever this session runs; if an open `STATE.md` names a
-different model for this session, report the divergence in one German line
+different model for this session, report the divergence in one line
 and let the user decide.
 
-**Model seats (Oliver's order 17.10.2026, replaces "Anthropic only" of
-27.09.; evidence in `SITZPLAN.md`):** boss sessions and the worker run
+**Model seats (default line-up since 17.10.2026; evidence in
+`SITZPLAN.md`):** boss sessions and the worker run
 **Opus 5.5 at effort medium** (`/model claude-opus-5-5`, `/effort medium`;
 worker `--effort medium`). **GPT-6 Astra at effort medium** (Codex CLI,
 always through `astra.sh` — model and effort are fixed there) holds the two
@@ -52,7 +52,7 @@ review seats: plan review (S2) and execution review (S4). **Sonnet 5 / Haiku
 4.5** keep the mechanical checks (Delegation). Fable 5.1 holds no seat. A
 seat change starts in `SITZPLAN.md`, never here.
 
-**The review circle — Oliver's shape, and its one law:** Opus makes, Astra
+**The review circle — its shape, and its one law:** Opus makes, Astra
 improves once, the boss verifies. Astra fills gaps and fixes errors directly
 — and when the work is good enough it changes NOTHING (`GUT_GENUG`). There is
 no second Astra pass on the same artefact: a second round argues with the
@@ -64,11 +64,9 @@ with: MACHINE predicates with witnessed reds and the boss's full diff read.
 **Astra availability.** Step 0 runs `bash ~/.claude/skills/route/astra.sh
 probe`. Exit 4 = Astra blocked at OpenAI (known account-entitlement fault,
 17.10.2026: "not supported when using Codex with a ChatGPT account") → tell
-Oliver in German and let him choose: wait, or this run with a stand-in
+the user and let them choose: wait, or this run with a stand-in
 (`ASTRA_MODEL=gpt-5.6-terra`, recorded in `STATE.md` as `Astra-Ersatz`).
-Never switch the model silently. (Sol, Kimi and DeepSeek assets —
-`worker.sh`, `kimi-*.sh`, `profiles/`, `schemas/kimi|deepseek/` — lie
-DORMANT.)
+Never switch the model silently.
 
 **Precedence when rules collide:** correctness > the user's explicit
 instruction > context hygiene. Never skip a verification, a diff read, or an
@@ -173,7 +171,7 @@ lessons that bear on THIS build into `PLAN.md` — build sessions rehydrate from
 constraints, files to touch, etappe breakdown, verification commands,
 out-of-scope list.
 
-**Cut by repo and surface — never one run per etappe** (Oliver, 31.07.2026):
+**Cut by repo and surface — never one run per etappe** (rule since 31.07.2026):
 etappen covered by the SAME verification-script set belong in ONE run; plan,
 counter-critique and verification tooling are paid again per run. A plan that
 needs a second, disjoint script set is two runs. A project with a human
@@ -250,7 +248,7 @@ Extract `structured_output` into `critique-verify-1.json`, the cost into
   that hunk, note the reason in `PLAN.md` under `## Astra verworfen`. Never
   re-ask Astra, never re-polish its wording.
 - **`BLOCKER` verdict or a `blocker` in `remaining[]`** (spec contradicts
-  itself; base assumption wrong): back to the USER in German with the finding
+  itself; base assumption wrong): back to the USER with the finding
   and its anchors. A wrong spec is the user's decision.
 - **Everything else in `remaining[]`, and every repo-verifier finding:**
   VERBATIM onto the **Wächterliste** — a numbered list under
@@ -329,7 +327,7 @@ the last 200 lines; `build-log-*.txt` belongs in `.gitignore`.
 **SAFE BOUNDARY after every etappe → verify, commit, measure. ARBEITEN: next
 etappe here. PLANEN and above: `STATE.md` and cut.**
 
-**New user requirement mid-run:** say in German that it changes the plan.
+**New user requirement mid-run:** say that it changes the plan.
 Touches a RISIKO criterion → add it to `## Spec` and run ONE delta critique of
 the new part only. Otherwise → note it under `## Offen` for after this run.
 Never build it unplanned (no Wächter item, no predicate — nothing verifies
@@ -413,7 +411,7 @@ from the repo root and as the only command in its Bash call.
 - **UNENTSCHEIDBAR is a valid exit:** when the measurement confirms a limit
   the plan itself named in advance, the honest verdict closes the finding —
   no fix round, no loosening of the threshold (that is the reward hack).
-- **Still red after the one round → stop.** Give the user in German the
+- **Still red after the one round → stop.** Give the user the
   finding, the failing predicate (measured vs target) and what was tried;
   the user decides (another round, waive, or abandon). Circling is the
   failure this loop is shaped against — a second round is the user's call,
@@ -421,11 +419,11 @@ from the repo root and as the only command in its Bash call.
 
 ## S6 — Close
 
-Report in German: the agreed spec, what was built, findings and their fates,
+Report to the user: the agreed spec, what was built, findings and their fates,
 verification results, both Astra verdicts (`GUT_GENUG` / `VERBESSERT` with
 the number of changes, or `Astra-Ersatz <model>`), any skipped second opinion
 plus reason, the worker cost from `WORKER-KOSTEN.md` — and EVERY line
-still standing under `## Offen`, `## Offene Minors` and `## Gates Oliver` as
+still standing under `## Offen`, `## Offene Minors` and `## Gates Nutzer` as
 an explicit handover block; a closed run whose known bugs live only in a file
 marked ABGESCHLOSSEN has lost them. Then:
 
@@ -477,7 +475,7 @@ next command without guessing? If not, fix it now — it is the only bridge.
 **Resume:** reconcile before acting — `STATE.md` describes the world as it
 was. `git log -1` matches the recorded SHA? `git branch --show-current`
 matches the recorded branch? Working tree clean? Named artefacts exist? Any
-mismatch: **stop and tell the user in German what diverged.** Never "repair" a
+mismatch: **stop and tell the user what diverged.** Never "repair" a
 state you did not witness — a repair is a claim, and the witness rule allows
 no claim without one. Verification red at an
 edge with nothing committed → record the failing predicate (measured vs
@@ -485,7 +483,7 @@ target) and that no commit happened; the next session resumes at S5, not S6.
 Abandoning a run: `STATE.md` line 1 `ABGEBROCHEN <Datum> — <Grund>`.
 
 **"Just keep going" from the user** outranks the hygiene rules: comply, batch
-every check, say once in German where you actually are (past 400k the harness
+every check, say once where you actually are (past 400k the harness
 may summarise mid-work, which loses more than a cut), and write `STATE.md`
 anyway.
 
@@ -513,9 +511,6 @@ in when measuring; moving work sideways is not saving.
   script.
 - Never enable a stop-review-gate during a route run (double loop, drains
   usage limits).
-- The dormant `schemas/kimi/` and `schemas/deepseek/` mirrors are not
-  maintained while no foreign seat exists; reactivating a foreign seat
-  starts with re-syncing them (`tests/schema-spiegel.test.sh`).
 - Never shorten an enforcing rule in this file to save bytes — and never grow
   this file from a run's lessons. Both directions of drift are documented
   failure modes; changes to this file are their own user-ordered task.

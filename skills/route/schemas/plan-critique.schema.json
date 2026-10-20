@@ -1,5 +1,5 @@
 {
-  "$comment": "anchor_type/anchor binden jeden Befund an seine Herkunft: repo = file:line, spec = zitierte Zeile aus ## Spec, plan = Abschnitt. Nur repo/spec verlaengern die Konvergenz - plan-verankerte Befunde sind der Loop im Streit mit der eigenen letzten Aenderung. coverage macht die Erdung pruefbar. Bei Aenderung IMMER kimi/plan-critique.schema.json mitziehen.",
+  "$comment": "anchor_type/anchor binden jeden Befund an seine Herkunft: repo = file:line, spec = zitierte Zeile aus ## Spec, plan = Abschnitt. Nur repo/spec verlaengern die Konvergenz - plan-verankerte Befunde sind der Loop im Streit mit der eigenen letzten Aenderung. coverage macht die Erdung pruefbar.",
   "type": "object",
   "additionalProperties": false,
   "properties": {

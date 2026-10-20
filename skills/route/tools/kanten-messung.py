@@ -8,9 +8,9 @@ Das setzt zweierlei voraus, und beides hat gemessen nicht getragen:
 
   1. Die Liste der Sessions muss vollstaendig und richtig sein. Sie wird von
      Hand in `STATE.md` gefuehrt - und das 4096-B-Budget drueckt sie heraus:
-     `wissens-center` traegt "Sessions: …,d66ffe1e,97eef5cb (Vollliste in
+     ein Lauf traegt "Sessions: …,d66ffe1e,97eef5cb (Vollliste in
      f57a334^)", die volle Liste lebt nur noch in einem Eltern-Commit;
-     `ueber-uns-nextlevel` hat gar keine Sessions-Zeile. Zwei von drei
+     ein zweiter hat gar keine Sessions-Zeile. Zwei von drei
      geprueften Laeufen tragen ausserdem eine Kennung, die NIE eine Datei
      getragen hat (`08399`, `cd0cba7e` - am 30.07.2026 in jedem
      Workspace-Ordner gesucht, nirgends; die Nachbarsessions derselben
@@ -18,8 +18,8 @@ Das setzt zweierlei voraus, und beides hat gemessen nicht getragen:
   2. Die Transkripte muessen zum Schlusszeitpunkt noch existieren. Claude Code
      raeumt nach `cleanupPeriodDays` auf - ohne Eintrag in settings.json sind
      das 30 Tage. Am 30.07.2026 gemessen: das aelteste Transkript endet in
-     JEDEM Workspace exakt an dieser Kante (AI-COMPLIANCE 30 Tage bei 168
-     Dateien, IORS-CRM 29, claude-config 25). Die Grenze ist real. Sie hat
+     JEDEM Workspace exakt an dieser Kante (drei Workspaces: 30 Tage bei 168
+     Dateien, 29 und 25). Die Grenze ist real. Sie hat
      bisher keinen Lauf gekostet - ein Lauf, der laenger als 30 Tage nach
      seiner ersten Session schliesst, verliert seinen Anfang aber lautlos.
 
@@ -168,7 +168,7 @@ def eigene_session():
 
     Quelle ist CLAUDE_CODE_SESSION_ID - dasselbe Verfahren, das
     tools/zonen-melder.py seit dem 25.07.2026 im Dauerbetrieb benutzt.
-    Bewusst NICHT "die neueste .jsonl im Ordner": bei Olivers parallelen
+    Bewusst NICHT "die neueste .jsonl im Ordner": bei parallelen
     Sessions greift das regelmaessig die falsche Datei, und ein falsch
     zugeordneter Messwert ist schlimmer als keiner.
     """

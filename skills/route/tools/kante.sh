@@ -46,7 +46,7 @@ set -uo pipefail
 # "Naechster Schritt fehlt" - 3 von 10 roten Ampeln 06.-11.10. waren das.
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
-SKILLDIR="C:/Users/User/.claude/skills/route"
+SKILLDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && { pwd -W 2>/dev/null || pwd; })"
 LIMIT=4096
 
 usage() { echo "Aufruf: $0 --messen|--pruefen <run-dir>" >&2; exit 2; }

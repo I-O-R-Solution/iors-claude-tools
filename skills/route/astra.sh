@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# Astra-Sitz fuer /route (Olivers Auftrag 17.10.2026): GPT-6 Astra ueber die
+# Astra-Sitz fuer /route (Standardbesetzung seit 17.10.2026): GPT-6 Astra ueber die
 # Codex-CLI, Denkstufe medium. Astra prueft den Plan EINMAL und die
 # Ausfuehrung EINMAL, verbessert direkt - oder laesst es, wenn es gut genug ist.
 #
@@ -17,12 +17,12 @@
 #       5 Sitz-Verstoss (falsche Datei angefasst ODER Urteil passt nicht zur
 #       Platte) · 6 kein gueltiger Bericht.
 #
-# Overrides: ASTRA_MODEL (Standard gpt-6-astra) - NUR mit Olivers Ja fuer
+# Overrides: ASTRA_MODEL (Standard gpt-6-astra) - NUR mit Ja des Nutzers fuer
 # diesen Lauf, in STATE.md vermerkt. CODEX_BIN (Standard: codex im PATH).
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-# Skill-Ordner aus dem eigenen Ort - laeuft so bei jedem, nicht nur unter C:/Users/User.
+# Skill-Ordner aus dem eigenen Ort - laeuft so bei jedem Nutzer.
 SKILLDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && { pwd -W 2>/dev/null || pwd; })"
 CODEX_BIN="${CODEX_BIN:-codex}"
 ASTRA_MODEL="${ASTRA_MODEL:-gpt-6-astra}"

@@ -14,7 +14,7 @@ der sich selbst verstärkt. Die Kommentare stehen zu lassen kostet Bytes in gena
 der Datei, die klein bleiben muss. Deshalb tragen zwei billige Träger die Regeln
 über den Schnitt:
   1. Die Zeile "Regeln:" unter dem Titel — Pfad auf DIESE Datei, 47 B
-     (absolut: C:\Users\User\.claude\skills\route\STATE-TEMPLATE.md).
+     (absolut: ~/.claude/skills/route/STATE-TEMPLATE.md).
      Die Rehydrierung ruft sie verbindlich auf ("vor dem Schnitt lesen"). Der
      volle Regeltext bleibt hier und wird vor jedem Schreiben neu geholt.
   2. Die Abschnitts-Überschriften tragen ihre Regel im Klammerzusatz (Cap,
@@ -70,7 +70,7 @@ UND committet. Sonst ROT nach diesem Muster:
     Kante: ROT — E7 funnel-smoke 228/230 (Preis-Assertions), kein Commit
 Wer ROT schreibt, füllt "Nächster Schritt" mit dem Fix-Befehl, nicht mit der
 nächsten Bau-Etappe. Die Zeile nie weglassen: fehlt sie, hält die neue Session
-einen halben Bau für fertig. GEWAIVT = Oliver hat ein rotes MACHINE-Gate
+einen halben Bau für fertig. GEWAIVT = der Nutzer hat ein rotes MACHINE-Gate
 explizit gewaivt (S4): Messwert bleibt stehen, Commit war erlaubt — RISIKO-
 schützende Gates sind nie waivbar. KONTEXT = gemessener Kontextstand
 (tools/kontext-jetzt.sh) im Moment der Schnitt-Entscheidung.
@@ -87,7 +87,7 @@ Kante-Zeile, nicht in eigene Zeilen — das Byte-Budget hat keinen Platz dafür.
 Kritik = Bilanz der beiden EINMALIGEN Astra-Durchgänge (Plan S2 Schritt 3,
 Ausführung S4) und Träger der Wächterliste über die Schnitte: Astra-Urteil
 mit Zahl der Änderungen, Zahl der Wächter-Punkte in PLAN.md, davon im
-Diff-Review abgehakt. Astra-Ersatz nur, wenn Oliver für diesen Lauf ein
+Diff-Review abgehakt. Astra-Ersatz nur, wenn der Nutzer für diesen Lauf ein
 anderes Modell freigegeben hat. Vor dem Plan-Review: "Kritik: —".
 Fehlt die Zeile, rollt die neue Session die Einwände als neu wieder auf.
 
@@ -167,7 +167,7 @@ NEU-GEEICHT: Golden/Baseline bewusst verschoben. Diff ist gewollt, kein Drift.
 Leer lassen ist fast immer falsch. Nach einer Bau-Etappe gibt es Narben.
 Sind es mehr als 6: die schwächste streichen, nicht die neueste.
 -->
-- <VERWORFEN: Entwurf-Banner in AGB — stattdessen Gate-Liste im Kopf (Oliver)>
+- <VERWORFEN: Entwurf-Banner in AGB — stattdessen Gate-Liste im Kopf (Nutzer)>
 - <WIDERLEGT: Runbook "seit 12.07. live" — real standen alte Preise>
 - <FALSCH-GRÜN: gen-...py --verify rot = Provenienz-Zyklus, kein Inhaltsdrift>
 - <NEU-GEEICHT: goldens/ nach E1 neu; nur Basis darf abweichen, Overlay nicht>
@@ -194,7 +194,7 @@ Resume immer aus dem Repo-Root, als einziger Befehl im Bash-Aufruf, mit
 Noch kein Bau gefahren: "Resume: keine · -".
 -->
 
-## Gates Oliver
+## Gates Nutzer
 
 <!-- Was ohne den Menschen nicht weitergeht. Sonst baut die neue Session daran vorbei. -->
 - <Sichtabnahme E2 offen; kein Deploy, kein Push>

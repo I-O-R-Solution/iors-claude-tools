@@ -1,5 +1,5 @@
 {
-  "$comment": "Astra-Review-Bericht (Plan- UND Diff-Review, 17.10.2026). OpenAI-Strict-Mode: additionalProperties false auf jeder Ebene, alle Properties required. verdict GUT_GENUG heisst: nichts geaendert - astra.sh prueft das gegen die Platte (geaenderte Dateien muessen leer sein). VERBESSERT verlangt mindestens einen changes-Eintrag UND eine geaenderte Datei. BLOCKER = etwas, das Astra nicht selbst beheben darf (Spec-Widerspruch, falsche Grundannahme) - geht an Oliver.",
+  "$comment": "Astra-Review-Bericht (Plan- UND Diff-Review, 17.10.2026). OpenAI-Strict-Mode: additionalProperties false auf jeder Ebene, alle Properties required. verdict GUT_GENUG heisst: nichts geaendert - astra.sh prueft das gegen die Platte (geaenderte Dateien muessen leer sein). VERBESSERT verlangt mindestens einen changes-Eintrag UND eine geaenderte Datei. BLOCKER = etwas, das Astra nicht selbst beheben darf (Spec-Widerspruch, falsche Grundannahme) - geht an den Nutzer.",
   "type": "object",
   "additionalProperties": false,
   "required": ["verdict", "summary", "changes", "remaining", "checks_run", "inspected"],

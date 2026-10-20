@@ -142,7 +142,7 @@ PREIS_PRO_MIO = preistabelle(STANDARD_MODELL)[0]
 # Schalter ueberschreibbar, damit die Datei nicht still von SKILL.md abdriftet,
 # wenn dort die Ziele wandern.
 #
-# 200k, nicht mehr 120k (Olivers Entscheidung 30.07.2026). Der alte Wert stammte
+# 200k, nicht mehr 120k (Entscheidung 30.07.2026). Der alte Wert stammte
 # aus v1 und widersprach SKILL.md, das seit jeher "mean <= 200k, peak <= 400k"
 # nennt: Laeufe, die der Skill in Ordnung fand, meldete diese Datei als
 # VERFEHLT. 200k ist ausserdem kein runder Wunsch, sondern genau die Decke der
