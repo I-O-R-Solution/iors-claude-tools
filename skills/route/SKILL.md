@@ -1,27 +1,33 @@
 ---
 name: route
 description: >-
-  On-demand one-pass build loop. The boss (this session) interviews, plans
-  once and gets ONE adversarial critique; GPT-5.6 Sol (Codex) builds; the boss
-  reviews the finished work — findings are fixed at the artefact, never by
-  re-polishing the plan. Kimi K3 adds a cross-family second opinion on RISIKO
-  and GROSS runs. Trigger ONLY when the user types /route, says "route this", "run the
-  route loop", or explicitly asks for the boss-plus-Sol loop. Do NOT use for
-  ordinary single-model coding, planning, refactors, or chat.
+  On-demand one-pass build loop. Opus 5.5 (medium) plans; GPT-6 Astra
+  (Codex, medium) reviews the plan ONCE and improves it — or leaves it when
+  it is good enough; a headless Opus 5.5 worker (medium) builds; Astra
+  reviews the execution ONCE and fixes — or leaves it; the boss verifies and
+  commits. A short review circle, never a loop. RISIKO and GROSS runs add a
+  read-only repo-verifying critic.
+  Trigger ONLY when the user types /route, says "route this", "run the route
+  loop", or explicitly asks for the boss-plus-worker loop. Not for ordinary
+  single-model coding, planning, refactors, or chat — the loop costs a
+  separate worker, a critique round and session cuts, which such tasks never
+  pay back.
 ---
 
 # Route v2: one pass — the plan is attacked once, the work is reviewed
 
 You are the boss. You PLAN and you REVIEW; you never write the implementation —
-the worker does (Sol by default). Talk to the user in German; prompts to Sol
-are English. Stay silent between tool calls — one sentence when you find
+the worker does (a headless Opus 5.5 session). Talk to the user in German;
+prompts to the worker and the critics are English. Stay silent between tool calls — one sentence when you find
 something, change direction, or hit a blocker. Decide micro-choices yourself;
 the real gates are never small: every `PERZEPTIV` acceptance, any scope change
 or destructive action, every escalation.
 
-**Core law: critique never polishes the plan.** One adversarial round attacks
-the plan; every finding below blocker travels WITH the build as a checklist
-(the Wächterliste) and is verified at the artefact — diff, tests, screen —
+**Core law: review never polishes in rounds.** Astra reviews the plan ONCE
+and may fix it in that pass — by a fixed bar (false repo claim, uncovered
+spec point, unfalsifiable criterion, harmful or missing step), never for
+style; what it leaves open travels WITH the build as a checklist (the
+Wächterliste) and is verified at the artefact — diff, tests, screen —
 where disputes have a floor. The build itself is reversible (git); the gates
 sit before the *irreversible* steps (deploy, migration, send), not before
 building. Why (measured 07/2026): round 1 of plan critique caught every real
@@ -30,27 +36,39 @@ findings 2→2→6, four of six self-inflicted; a 101-KB plan, zero lines built)
 Critique of a plan argues with text and diverges; critique of a diff measures
 facts and converges.
 
-**The boss is the session, not a callable.** Sol and Kimi are started through
-the shell; you are the Claude Code session — the only participant with a
-shell, the file system, and the user. The boss model is whatever this session
-runs; if an open `STATE.md` names a different model for this session, report
-the divergence in one German line and let the user decide.
+**The boss is the session, not a callable.** The worker and the critics are
+started through the shell as headless `claude -p` sessions; you are the
+interactive Claude Code session — the only participant with the user. The
+boss model is whatever this session runs; if an open `STATE.md` names a
+different model for this session, report the divergence in one German line
+and let the user decide.
 
-**Model seats (Oliver's standing decision, 25.07./30.07., benchmarks moved
-to `SITZPLAN.md` 01.09.):** boss sessions default to **Opus 5**
-(`/model claude-opus-5`). **Fable 5** takes exactly the TWO seats where pure
-thinking is the whole product: writing the plan (S2) on RISIKO or GROSS runs,
-and the RISIKO diff review (S4, already mandated below). Both Fable seats sit
-on edges that are hard cuts anyway (S1→S2 and the review session), so they
-cost no extra session — the handoff's `Nächster Schritt` names the `/model`
-switch verbatim. The BUILDER is never a Claude model: Sol/Kimi build on their
-own quota, and a Claude builder would put Claude review on Claude work — the
-foreign family is the review asset. Mechanical checks stay on sonnet/haiku
-subagents (Delegation). The evidence per seat — benchmark, number, date,
-price, re-measure date — lives in `SITZPLAN.md`; a seat change starts there,
-never here. (DeepSeek was evaluated and REJECTED as a seat 01.09.2026 —
-reasons in `SITZPLAN.md`; the provider-blind worker keeps the door a
-one-config-file affair if that ever changes.)
+**Model seats (Oliver's order 17.10.2026, replaces "Anthropic only" of
+27.09.; evidence in `SITZPLAN.md`):** boss sessions and the worker run
+**Opus 5.5 at effort medium** (`/model claude-opus-5-5`, `/effort medium`;
+worker `--effort medium`). **GPT-6 Astra at effort medium** (Codex CLI,
+always through `astra.sh` — model and effort are fixed there) holds the two
+review seats: plan review (S2) and execution review (S4). **Sonnet 5 / Haiku
+4.5** keep the mechanical checks (Delegation). Fable 5.1 holds no seat. A
+seat change starts in `SITZPLAN.md`, never here.
+
+**The review circle — Oliver's shape, and its one law:** Opus makes, Astra
+improves once, the boss verifies. Astra fills gaps and fixes errors directly
+— and when the work is good enough it changes NOTHING (`GUT_GENUG`). There is
+no second Astra pass on the same artefact: a second round argues with the
+first round's repairs and circles (measured 07/2026: rounds 3–5 found mostly
+their own prior repairs). Two model families now meet on every run — Astra
+is the foreign eye on Claude's work; the floor stays what no model can argue
+with: MACHINE predicates with witnessed reds and the boss's full diff read.
+
+**Astra availability.** Step 0 runs `bash ~/.claude/skills/route/astra.sh
+probe`. Exit 4 = Astra blocked at OpenAI (known account-entitlement fault,
+17.10.2026: "not supported when using Codex with a ChatGPT account") → tell
+Oliver in German and let him choose: wait, or this run with a stand-in
+(`ASTRA_MODEL=gpt-5.6-terra`, recorded in `STATE.md` as `Astra-Ersatz`).
+Never switch the model silently. (Sol, Kimi and DeepSeek assets —
+`worker.sh`, `kimi-*.sh`, `profiles/`, `schemas/kimi|deepseek/` — lie
+DORMANT.)
 
 **Precedence when rules collide:** correctness > the user's explicit
 instruction > context hygiene. Never skip a verification, a diff read, or an
@@ -70,19 +88,21 @@ security mechanism is the subject of the build.
 
 | | Standard | RISIKO |
 | --- | --- | --- |
-| Plan critique | Sol, one round | Sol + Kimi in PARALLEL, one round |
-| Diff review | boss, in-session | FRESH session on Fable 5 |
+| Plan review | Astra, one pass | Astra + Opus 5.5 read-only repo-verifier in PARALLEL, one pass |
+| Execution review | Astra, one pass | Astra, one pass |
+| Boss verification + full diff read | in-session | FRESH session (Opus 5.5) — never the one that watched the build |
 | Red witnesses | closing gates | every MACHINE gate |
 
-**GROSS gets the second critique too:** when the build classes GROSS (> 120k,
-`KOSTEN.md`), Kimi runs in parallel at Step 3 even on Standard runs — nothing
-else upgrades. A failing Kimi preflight is repaired ONCE before skipping is
+**GROSS gets the repo-verifier too:** when the build classes GROSS (> 120k,
+`KOSTEN.md`), it runs in parallel at Step 3 even on Standard runs — nothing
+else upgrades. A failed reviewer call is repaired ONCE before skipping is
 allowed (a repaired critic found the only real blocker on file); a skip is a
 recorded gap in `STATE.md`.
 
 Upgrading to RISIKO is always allowed — state the reason in `PLAN.md`.
-Downgrading is not. When in doubt, it is RISIKO. Record the class and the
-matching criterion in `PLAN.md` line 1 at Step 0.
+Downgrading is not: the criteria are facts about what the run touches, and
+facts do not fade because the run feels easy. When in doubt, it is RISIKO.
+Record the class and the matching criterion in `PLAN.md` line 1 at Step 0.
 
 ## Context zones — the spine
 
@@ -95,8 +115,8 @@ zone line, run the command.
 
 - **< 200k ARBEITEN:** start any unit. A finished phase does not force a cut.
 - **200–300k PLANEN:** start only what you expect to finish under 300k.
-- **300–400k LANDEN:** start nothing new — finish, verify, commit, `STATE.md`,
-  cut.
+- **300–400k LANDEN:** start nothing new (a unit started here eats the landing
+  reserve) — finish, verify, commit, `STATE.md`, cut.
 - **≥ 400k:** land at the NEXT checkpoint (worker report validated + own
   verification recorded + commit; or spec written; or critique JSON on disk).
   Work in flight is never thrown away.
@@ -114,9 +134,9 @@ zone line, run the command.
 - `.planning/route/<slug>/` holds artefacts. They are evidence, not context —
   never re-read them to catch up. Rehydration reads ONLY `SKILL.md` +
   `STATE.md` + `PLAN.md`.
-- Two edges cut regardless of zone: between plan critique and build (merged
+- Two edges cut regardless of zone: between plan review and build (merged
   plan+build sessions balloon past 400k, three lessons on file), and a RISIKO
-  diff review never runs in the session that watched the build.
+  boss verification never runs in the session that watched the build.
 
 ## S1 — Setup and interview
 
@@ -130,11 +150,12 @@ Zettel is the contract for the immediate step. From the next phase edge on,
 v2 applies: no further critique rounds, findings triage as below.
 
 New run: check `git status` and `git branch --show-current` — unrelated
-uncommitted changes → warn the user before Sol writes anything (parallel
+uncommitted changes → warn the user before the worker writes anything (parallel
 sessions). Record `git rev-parse --short HEAD` as the run's **base SHA** into
 `STATE.md` (`Basis:`), never condensed away — the diff review runs against it
 — and the BRANCH into the `Abgleich:` line (an unrecorded branch once cost
-three verified etappen to a foreign branch). Decide Standard/RISIKO.
+three verified etappen to a foreign branch). Decide Standard/RISIKO. Run
+`bash ~/.claude/skills/route/astra.sh probe` (see "Astra availability").
 
 **Step 1 — Interview.** Extract a complete, unambiguous spec. AskUserQuestion,
 up to 4 related questions per round; stop only at zero material gaps. **Write
@@ -144,7 +165,7 @@ cut. `STATE.md` has no room for it and rehydration reads nothing else.
 
 **EDGE → STATE.md, fresh session.**
 
-## S2 — Plan and the one critique
+## S2 — Plan and the one Astra pass
 
 **Step 2 — Plan.** Read `~/.claude/skills/route/LESSONS.md` and copy the
 lessons that bear on THIS build into `PLAN.md` — build sessions rehydrate from
@@ -187,83 +208,93 @@ any verdict (a full-page screenshot without scrolling showed an "empty" page
 that wasn't). "Looks right" without a number or the PERZEPTIV label is a plan
 defect.
 
-**Step 3 — ONE adversarial critique (read-only).** Prompt assembly is shell
-work, never model work — from the run directory:
-`cat ~/.claude/skills/route/prompts/critique-header.md PLAN.md ~/.claude/skills/route/prompts/critique-tail.md > prompt-1.md`
-— the plan stays INLINE (the prompt file is the audit record of what was
-criticised). Then:
+**Step 3 — ONE Astra plan pass (review and improve).** Commit `PLAN.md`
+first, so Astra's edit is its own diff. Then, from the repo root, as the only
+command in its Bash call (background; the harness notifies you):
 
-    codex exec -s read-only \
-      --output-schema ~/.claude/skills/route/schemas/plan-critique.schema.json \
-      -o .planning/route/<slug>/critique-1.json - < prompt-1.md
+    bash ~/.claude/skills/route/astra.sh plan .planning/route/<slug>
 
-Call via stdin, never as an argument. The header orders the critic into the
-repository — verify every claim the plan makes about existing code or live
-state, cite `file:line` — and the schema demands anchors plus a coverage
-record (paths inspected AND high-risk surfaces not inspected).
+The script fixes model and effort (GPT-6 Astra, medium), writes the prompt
+(`prompts/astra-plan.md` — the bar for what Astra may change, and the order
+to change nothing when the plan is good enough), keeps `PLAN.vor-astra.md`,
+and MEASURES on disk what Astra touched. Exit 0 = report valid and seat
+rules held; 4 = Astra unreachable (Step 0 rule); 5 = seat violation (a
+file other than `PLAN.md` touched, or the verdict contradicts the disk —
+`GUT_GENUG` with edits, `VERBESSERT` without) — restore the foreign file,
+treat the report as void, tell the user; 6 = no valid report (artefact
+handshake below). Report: `astra-plan.json`; edited paths:
+`astra-plan-geaendert.txt`.
 
-**RISIKO: run Kimi in PARALLEL** — same round, background, not a second
-round. Foreign-provider rule (generalised 01.09.): ask ONCE per run whether
-the foreign provider is cleared for export; declined or gate-blocked = skip
-and state the gap in `STATE.md`. Two hard conditions — preflight exit 0 AND
-that clearance:
+**RISIKO/GROSS: run the repo-verifier in PARALLEL** — same moment,
+background, read-only, against the PRE-Astra plan. From the run directory:
+`cat ~/.claude/skills/route/prompts/critique-header.md PLAN.md ~/.claude/skills/route/prompts/critique-tail.md > prompt-1.md`,
+prepend one line — "Your lens: verify every factual claim about code, data
+and live state against the repository; logic critique is covered
+elsewhere." — then from the repo root:
 
-    bash ~/.claude/skills/route/preflight.sh kimi --quiet
-    bash ~/.claude/skills/route/kimi-worker.sh critique <slug> \
-      ~/.claude/skills/route/schemas/kimi/plan-critique.schema.json \
-      .planning/route/<slug>/critique-kimi-1.json "<critique prompt>"
+    claude -p --model claude-opus-5-5 --effort medium \
+      --output-format json \
+      --json-schema "$(cat ~/.claude/skills/route/schemas/plan-critique.schema.json)" \
+      --allowedTools "Read,Glob,Grep,Bash(git log:*),Bash(git show:*),Bash(git diff:*)" \
+      --disallowedTools "Edit,Write,NotebookEdit" \
+      < .planning/route/<slug>/prompt-1.md \
+      > .planning/route/<slug>/critique-verify-1.envelope.json
 
-**Triage — the only handling of findings; there is no second round:**
+Extract `structured_output` into `critique-verify-1.json`, the cost into
+`WORKER-KOSTEN.md`. It never edits the plan; its findings only feed triage.
 
-- **Foundation blocker** (the spec contradicts itself; a base assumption about
-  data, repo or live state is wrong): back to the USER in German with the
-  finding and its anchors. A wrong spec is the user's decision, not a critique
-  loop's.
-- **BLOCKER:** fix the plan ONCE, via `Edit` on the affected sections — never
-  rewrite `PLAN.md` whole. No re-critique of the fix: it becomes a NAMED item
-  on the Wächterliste and is verified at the artefact.
-- **Everything else (major/minor):** goes VERBATIM onto the **Wächterliste** —
-  a numbered list under `## Wächterliste` in `PLAN.md`, injected into every
-  build prompt, checked off item by item in the diff review. It never changes
-  the plan.
+**Triage — the only handling; there is no second pass:**
 
-Record in `STATE.md`: `Kritik: <blocker>/<major>/<minor> · Wächter <n>`.
+- **Read Astra's edit yourself:** `diff -u PLAN.vor-astra.md PLAN.md` in the
+  run directory (small by construction). An edit you can PROVE wrong at `file:line` → revert
+  that hunk, note the reason in `PLAN.md` under `## Astra verworfen`. Never
+  re-ask Astra, never re-polish its wording.
+- **`BLOCKER` verdict or a `blocker` in `remaining[]`** (spec contradicts
+  itself; base assumption wrong): back to the USER in German with the finding
+  and its anchors. A wrong spec is the user's decision.
+- **Everything else in `remaining[]`, and every repo-verifier finding:**
+  VERBATIM onto the **Wächterliste** — a numbered list under
+  `## Wächterliste` in `PLAN.md`, injected into every build prompt, checked
+  off in S4. It never changes the plan; the artefact settles it.
+- **`GUT_GENUG`:** nothing to do — that is the expected outcome for a good
+  plan, not a missed review.
+
+Commit the result. Record in `STATE.md`:
+`Kritik: Astra <verdict> · Änderungen <n> · Wächter <n>`.
 
 **EDGE → STATE.md, fresh session (hard — never plan and build in one
 session).**
 
 ## S3 — Build (one loop per etappe)
 
-**Worker choice.** Default Sol — pass no `-m` flag and never set model or
-reasoning effort (the user's config already runs max). UI-/frontend-heavy
-etappen (visual layout, styling, HTML/CSS/animation): offer **Kimi K3** via
-one AskUserQuestion (Frontend Arena 07/2026 put it ahead of Fable and Sol in
-exactly this discipline; not measured against Opus — the `PERZEPTIV`
-acceptance decides). Same two Kimi conditions as Step 3; choose per etappe,
-not per run; note `Worker: Kimi` in `STATE.md`. An etappe whose work is
-*running* guards is a bad Kimi fit — it has no shell.
+**Worker.** Always a headless **Opus 5.5** session (`claude -p`), never the
+boss session itself — the boss plans and reviews, so the builder must be a
+separate context. No worker choice per etappe; a seat change goes through
+`SITZPLAN.md`.
 
-**Build call:**
+**Build call** (from the repo root — `claude -p` works in the caller's cwd):
 
-    codex exec -s workspace-write \
-      --output-schema ~/.claude/skills/route/schemas/build-report.schema.json \
-      -o .planning/route/<slug>/build-report-<e>.json - < build-prompt-<e>.md
+    claude -p --model claude-opus-5-5 --effort medium \
+      --session-id <new UUID> --output-format json \
+      --json-schema "$(cat ~/.claude/skills/route/schemas/build-report.schema.json)" \
+      --allowedTools "Read,Edit,Write,Glob,Grep,Bash" \
+      --disallowedTools "Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git reset:*),Bash(git checkout:*),Bash(git stash:*),Bash(git rebase:*)" \
+      < .planning/route/<slug>/build-prompt-<e>.md \
+      > .planning/route/<slug>/build-report-<e>.envelope.json
 
-- Open the session `workspace-write` from the FIRST call — `codex exec resume`
-  accepts no `-s` and inherits the session sandbox.
-- Etappe protocol, stated in the prompt: Sol issues **no git write commands**
-  (its sandbox cannot write `.git` on Windows) and stops after each etappe.
+- Generate the UUID yourself (`python -c "import uuid;print(uuid.uuid4())"`)
+  and record it in `STATE.md` BEFORE the call — then the session is
+  resumable even if the call dies. Resume by that UUID, never `--continue`
+  (a parallel session may be the newest).
+- Etappe protocol, stated in the prompt AND enforced by `--disallowedTools`:
+  the worker issues **no git write commands** and stops after each etappe.
   The boss verifies and commits, then resumes.
-- Record the Codex session UUID into `STATE.md` the moment `codex exec` prints
-  it. Resume by UUID, never `resume --last` — a parallel session may be the
-  newest. Resume is ALWAYS `codex -C <repo> exec resume <UUID>` — the global
-  `-C` BEFORE the subcommand; resume does not inherit the session's workdir,
-  it takes the caller's — and ALWAYS the only command in its Bash call:
-  combining it with anything swallows the prompt silently. After every codex
-  start, check the log's `workdir:` line against the target repo. Resume also
-  inherits neither `--output-schema` nor `-o` — both go on every resume call,
-  see S5.
-- The build prompt carries the Wächterliste and instructs Sol to run the
+- Extract `structured_output` → `build-report-<e>.json`; append
+  `total_cost_usd` to `WORKER-KOSTEN.md`. The worker runs on the same Claude
+  quota as the boss — its cost is real and must appear in S6.
+- Every resume repeats `--output-format json`, `--json-schema`, the tool
+  flags and the redirect — do not rely on inheritance; see S5.
+- The build prompt carries the Wächterliste and instructs the worker to run the
   plan's verification commands itself and fill `checks[]`: predicate, cwd,
   measured, target, `red_witness`, `fired_rule` (WHICH rule produced the
   pass/block), `green_first` (the same check seen green on the intact fixture
@@ -276,11 +307,13 @@ not per run; note `Worker: Kimi` in `STATE.md`. An etappe whose work is
   were reachable with it alone — and it stood as prose in `LESSONS.md` AND
   verbatim in a run's own `PLAN.md` and was ignored at both. Twice overlooked
   becomes enforced.
-- Prompts to Sol follow the `gpt-5-4-prompting` skill's XML block recipes.
-- **Sol unavailable** (quota, outage): never switch silently. Offer Kimi as
-  replacement worker (preflight gate as above); a Codex session cannot cross
-  providers — Kimi starts FRESH from `PLAN.md` + `STATE.md`, so write both
-  first. Declined or blocked → `STATE.md` and stop.
+- Build prompts: full task spec up front (spec, Wächterliste, etappe,
+  verification commands, stop rule) in plain sections — Opus 5.5 does best
+  with the whole picture at once, not drip-fed steps.
+- **Worker unavailable** (rate limit, outage, `is_error: true`): record exit
+  code, `subtype` and `api_error_status` in `STATE.md` and stop. Never build
+  in the boss session as a fallback — that removes the separation the review
+  depends on.
 
 **Artefact handshake — after every worker or reviewer call, before you
 interpret success.** The target file exists, is fresh for THIS call, parses,
@@ -289,8 +322,9 @@ prove none of these. Conversely a non-zero exit does not erase valid output:
 complete structured output plus a validator failure is **POSTPROCESSOR-RED** —
 preserve it, repair the validator, promote it. Call it a crash only when no
 structured output exists, and record exit code + last stderr lines. Never keep
-an unbounded stdout stream in the run directory: on failure byte count,
-SHA-256 and the last 200 lines; `build-log-*.txt` belongs in `.gitignore`.
+an unbounded stdout stream in the run directory — it is a context bomb for
+whoever rehydrates and dead weight in git: on failure byte count, SHA-256 and
+the last 200 lines; `build-log-*.txt` belongs in `.gitignore`.
 
 **SAFE BOUNDARY after every etappe → verify, commit, measure. ARBEITEN: next
 etappe here. PLANEN and above: `STATE.md` and cut.**
@@ -298,9 +332,26 @@ etappe here. PLANEN and above: `STATE.md` and cut.**
 **New user requirement mid-run:** say in German that it changes the plan.
 Touches a RISIKO criterion → add it to `## Spec` and run ONE delta critique of
 the new part only. Otherwise → note it under `## Offen` for after this run.
-Never build it unplanned, never silently defer it.
+Never build it unplanned (no Wächter item, no predicate — nothing verifies
+it), never silently defer it (what is not on record is lost at the cut).
 
-## S4 — Verification and diff review (the gate)
+## S4 — Astra execution pass, then verification and diff read (the gate)
+
+**Astra execution pass — ONCE, after the LAST etappe is committed** (not per
+etappe). From the repo root, as the only command in its Bash call
+(background):
+
+    bash ~/.claude/skills/route/astra.sh diff .planning/route/<slug> <basis>
+
+Astra reads the full change against the base SHA, checks spec, acceptance
+criteria and Wächterliste, runs the verification commands its sandbox
+allows, and FIXES directly what is wrong — bug, spec deviation, missing
+piece, broken check; the smallest change, class not instance. Good enough →
+it changes nothing (`GUT_GENUG`). Its fixes land UNCOMMITTED in the working
+tree; edited paths are measured into `astra-diff-geaendert.txt`. Exit codes
+as in Step 3; exit 5 here also means `.planning/` was touched. Astra's
+`remaining[]` items: `blocker` → S5 or the user; the rest → `## Offene
+Minors`.
 
 **Verify.** Re-run the plan's verification commands yourself — all checks in
 ONE batched turn. Delegate every check that HAS a machine predicate to a
@@ -316,38 +367,42 @@ value stays recorded, the Kante carries `GEWAIVT — <gate> <messwert>`, the
 commit is allowed. Gates protecting a RISIKO criterion (data loss, missending,
 migration, guard efficacy) are never waivable.
 
-**Diff review (indivisible).** Read the FULL diff against the base SHA —
-`git diff <basis>..HEAD` — never only the last etappe. Correctness, edge
-cases, security, spec compliance, and the Wächterliste checked off item by
-item. *Violated if* any agent, model or filter reads the diff and hands you a
-summary in its place — a pre-filter can withhold a finding without you
-noticing, and an absent finding is unreviewable. Extra reviewers only ADD,
-never replace or prioritise: `/codex:review` is Sol reviewing Sol's own code;
-Kimi is the foreign family, gated as above. **RISIKO: this step runs in a
-FRESH session on Fable 5** — `STATE.md`'s `Nächster Schritt` names the model
-switch verbatim (`/model claude-fable-5`, then `/route`), and a model boundary
-is always a cut. Standard: you read it yourself, here.
+**Diff read (indivisible).** Read the FULL diff against the base SHA —
+`git diff <basis>` (committed etappen plus Astra's uncommitted fixes) —
+never only the last etappe. Correctness, edge cases, security, spec
+compliance, and the Wächterliste checked off item by item. Astra's fixes
+get no deference: one you can PROVE wrong at `file:line` → revert that hunk
+(`git restore -p`), record why; never write new code yourself. *Violated if*
+any agent, model or filter reads the diff and hands you a summary in its
+place — Astra's report ADDS to your read, never replaces it. Then commit
+Astra's surviving fixes as their OWN commit (`fix(<slug>): Astra-Review`).
+**RISIKO: verify and read in a FRESH Opus 5.5 session** — never the one that
+watched the build; `STATE.md`'s `Nächster Schritt` names it (`/route`).
+Standard: here.
 
-Findings → S5. None → S6.
+Real defects left → S5. None → S6.
 
-## S5 — Fix rounds (max 3 per finding)
+## S5 — The one fix round (after Astra)
 
-    codex -C <repo> exec resume <UUID> \
-      --output-schema ~/.claude/skills/route/schemas/build-report.schema.json \
-      -o .planning/route/<slug>/build-report-<f>.json \
-      "<delta findings only — do not restate the plan>"
+Astra was the improvement pass. What survives it and your diff read gets ONE
+Opus fix round — no second Astra pass, no third round:
 
-**The two flags are not optional on resume.** `resume` accepts both (verified
-against the CLI 17.08.2026) but inherits NEITHER from the session that was
-resumed. Drop them and the fix round returns prose instead of a validated
-report — no `checks[]`, no `red_before`, no witnessed red, and the artefact
-handshake below has nothing to validate. Measured 08/2026: fix rounds are 22 of
-47 worker calls, so an unvalidated resume is the majority case, not the edge.
+    claude -p --resume <UUID> --model claude-opus-5-5 --effort medium \
+      --output-format json \
+      --json-schema "$(cat ~/.claude/skills/route/schemas/build-report.schema.json)" \
+      --allowedTools "Read,Edit,Write,Glob,Grep,Bash" \
+      --disallowedTools "<same git deny list as the build call>" \
+      "<delta findings only — do not restate the plan>" \
+      > .planning/route/<slug>/build-report-<f>.envelope.json
 
-Kimi-built etappe: `kimi-worker.sh resume <slug> …` — its T8 gate decides;
-blocked (exit 6) → fresh `build` call carrying the delta. Worker exit map:
-2 usage/schema · 3 guard riegel · 4 key file · 5 no build session · 6 T8 ·
-7 env scan — treat 3/4/7 as environment problems, never as a build failure.
+**The schema flag is not optional on resume.** Verified 27.09.2026 (CLI
+2.1.270): `--resume` keeps the conversation and the `session_id`, and
+returns `structured_output` only when `--json-schema` is passed again. Drop
+it and the fix round returns prose instead of a validated report — no
+`checks[]`, no `red_before`, no witnessed red, and the artefact handshake
+has nothing to validate. Measured 08/2026: fix rounds are 22 of 47 worker
+calls, so an unvalidated resume is the majority case, not the edge. Run it
+from the repo root and as the only command in its Bash call.
 
 - **Fix the class, not the instance.** A critic's quote is a sample, not the
   census. Before closing any finding, grep for siblings of the same statement,
@@ -355,24 +410,21 @@ blocked (exit 6) → fresh `build` call carrying the delta. Worker exit map:
   quoted line writes the next round yourself.
 - Verify every fix round — its own predicates plus the touched Wächter items.
   An unverified fix has moved the defect, not fixed it.
-- **Divergence stop:** a fix diff that OPENS more severe findings than it
-  closes → stop immediately, give the user the per-round numbers in German,
-  await the decision. Never run another round just to use up attempts.
 - **UNENTSCHEIDBAR is a valid exit:** when the measurement confirms a limit
   the plan itself named in advance, the honest verdict closes the finding —
   no fix round, no loosening of the threshold (that is the reward hack).
-- After 2 failed rounds on the SAME finding: cross-family diagnosis BEFORE the
-  third try — Sol-built → `kimi-worker.sh critique` (conditions as in Step 3);
-  Kimi-built → Sol `codex exec -s read-only`. Hand over the finding, the
-  failing predicate (measured vs target) and the fixes already tried. After 3
-  failed rounds: stop and escalate to the user (their global rule), diagnosis
-  attached.
-- Zone check after every round; ARBEITEN → next round here.
+- **Still red after the one round → stop.** Give the user in German the
+  finding, the failing predicate (measured vs target) and what was tried;
+  the user decides (another round, waive, or abandon). Circling is the
+  failure this loop is shaped against — a second round is the user's call,
+  never the boss's.
 
 ## S6 — Close
 
 Report in German: the agreed spec, what was built, findings and their fates,
-verification results, any skipped second opinion plus reason — and EVERY line
+verification results, both Astra verdicts (`GUT_GENUG` / `VERBESSERT` with
+the number of changes, or `Astra-Ersatz <model>`), any skipped second opinion
+plus reason, the worker cost from `WORKER-KOSTEN.md` — and EVERY line
 still standing under `## Offen`, `## Offene Minors` and `## Gates Oliver` as
 an explicit handover block; a closed run whose known bugs live only in a file
 marked ABGESCHLOSSEN has lost them. Then:
@@ -392,8 +444,8 @@ marked ABGESCHLOSSEN has lost them. Then:
    `SKILL.md` changes only on the user's explicit order, never as part of
    closing a run.
 4. Sweep session litter from the skill dir: delete `.zone-*` and
-   `.kimi-raw-*`; keep `.kimi-session-*` and `.kimi-t4/t8-passed` (gate
-   markers).
+   `.kimi-raw-*`. Envelope files (`*.envelope.json`) stay in the run dir as
+   evidence; they are small.
 
 ## Cutting and resuming (every edge)
 
@@ -425,7 +477,9 @@ next command without guessing? If not, fix it now — it is the only bridge.
 **Resume:** reconcile before acting — `STATE.md` describes the world as it
 was. `git log -1` matches the recorded SHA? `git branch --show-current`
 matches the recorded branch? Working tree clean? Named artefacts exist? Any
-mismatch: **stop and tell the user in German what diverged.** Never "repair" a state you did not witness. Verification red at an
+mismatch: **stop and tell the user in German what diverged.** Never "repair" a
+state you did not witness — a repair is a claim, and the witness rule allows
+no claim without one. Verification red at an
 edge with nothing committed → record the failing predicate (measured vs
 target) and that no commit happened; the next session resumes at S5, not S6.
 Abandoning a run: `STATE.md` line 1 `ABGEBROCHEN <Datum> — <Grund>`.
@@ -449,14 +503,19 @@ in when measuring; moving work sideways is not saving.
 
 ## Hard rules
 
-- The boss never writes the implementation. Sol (or a designated Kimi etappe)
+- The boss never writes the implementation. The headless Opus 5.5 worker
   builds; you plan, verify, review, commit.
-- Plan critique runs `-s read-only`; only the build runs `-s workspace-write`.
-- Never enable the plugin's stop-review-gate during a route run (double loop,
-  drains usage limits).
-- Schema mirrors `schemas/*.schema.json` ↔ `schemas/kimi/` stay in sync
-  (MFJS: no type unions, `null` becomes `""`). A field added on one side and
-  missed on the other silently disables the check for that worker.
+- The repo-verifier runs with the read-only tool set (no Edit/Write); the
+  build and its resume get Edit/Write/Bash with the git deny list; Astra
+  writes only through `astra.sh` (Codex `workspace-write` sandbox, no `.git`
+  writes on Windows), and its seat limits are measured on disk, not trusted.
+  Never call Codex for a route seat directly — model and effort live in the
+  script.
+- Never enable a stop-review-gate during a route run (double loop, drains
+  usage limits).
+- The dormant `schemas/kimi/` and `schemas/deepseek/` mirrors are not
+  maintained while no foreign seat exists; reactivating a foreign seat
+  starts with re-syncing them (`tests/schema-spiegel.test.sh`).
 - Never shorten an enforcing rule in this file to save bytes — and never grow
   this file from a run's lessons. Both directions of drift are documented
   failure modes; changes to this file are their own user-ordered task.

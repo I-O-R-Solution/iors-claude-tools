@@ -1,0 +1,53 @@
+{
+  "$comment": "Astra-Review-Bericht (Plan- UND Diff-Review, 17.10.2026). OpenAI-Strict-Mode: additionalProperties false auf jeder Ebene, alle Properties required. verdict GUT_GENUG heisst: nichts geaendert - astra.sh prueft das gegen die Platte (geaenderte Dateien muessen leer sein). VERBESSERT verlangt mindestens einen changes-Eintrag UND eine geaenderte Datei. BLOCKER = etwas, das Astra nicht selbst beheben darf (Spec-Widerspruch, falsche Grundannahme) - geht an Oliver.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "summary", "changes", "remaining", "checks_run", "inspected"],
+  "properties": {
+    "verdict": { "enum": ["GUT_GENUG", "VERBESSERT", "BLOCKER"] },
+    "summary": { "type": "string" },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "what", "why", "anchor", "siblings_checked"],
+        "properties": {
+          "file": { "type": "string" },
+          "what": { "type": "string" },
+          "why": { "type": "string" },
+          "anchor": { "type": "string" },
+          "siblings_checked": { "type": "string" }
+        }
+      }
+    },
+    "remaining": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "finding", "anchor", "why_not_fixed"],
+        "properties": {
+          "severity": { "enum": ["blocker", "major", "minor"] },
+          "finding": { "type": "string" },
+          "anchor": { "type": "string" },
+          "why_not_fixed": { "type": "string" }
+        }
+      }
+    },
+    "checks_run": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "cwd", "result"],
+        "properties": {
+          "command": { "type": "string" },
+          "cwd": { "type": "string" },
+          "result": { "type": "string" }
+        }
+      }
+    },
+    "inspected": { "type": "array", "items": { "type": "string" } }
+  }
+}

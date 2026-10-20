@@ -61,7 +61,7 @@ Ein "nein" heißt nachtragen, nicht stoppen. Danach Byte-Größe prüfen.
 Regeln: ~/.claude/skills/route/STATE-TEMPLATE.md
 Datum: <TT.MM.JJJJ HH:MM> · Boss-S<n> <Modell> · <Standard|RISIKO> · Phase <Interview | Plan+Kritik | Bau E<n> | Verifikation E<n> | Fix f<n> | Abnahme>
 Kante: <grün | ROT — <was rot>, kein Commit | GEWAIVT — <gate> <messwert> | n/a — vor dem Bau> · PROBES E<n> <n>/<n> · PLAN <n>k <(+/-n)> · KONTEXT <n>k
-Kritik: <b>/<m>/<m> · Wächter <n> · geprüft <k>/<n>
+Kritik: Astra-Plan <GUT_GENUG|VERBESSERT n|BLOCKER> · Astra-Diff <—|GUT_GENUG|VERBESSERT n> · Wächter <n> · geprüft <k>/<n> <· Astra-Ersatz <modell>>
 Basis: <sha7 bei Lauf-Beginn> · Sessions: siehe MESSUNG.md
 Abgleich: HEAD <sha7> · Branch <name> · Baum <sauber | dirty: pfade>
 <!--
@@ -84,9 +84,11 @@ jeder Bau-Session, wächst aber unbeobachtet (gemessenes Maximum 134 KB); die
 Zahl ist die einzige Stelle, an der das jemand sieht. Alles gehört in die
 Kante-Zeile, nicht in eigene Zeilen — das Byte-Budget hat keinen Platz dafür.
 
-Kritik = Bilanz der EINEN Kritik-Runde (S2 Schritt 3) und Träger der
-Wächterliste über die Schnitte: blocker/major/minor, Zahl der Wächter-Punkte
-in PLAN.md, davon im Diff-Review abgehakt. Vor der Kritik: "Kritik: —".
+Kritik = Bilanz der beiden EINMALIGEN Astra-Durchgänge (Plan S2 Schritt 3,
+Ausführung S4) und Träger der Wächterliste über die Schnitte: Astra-Urteil
+mit Zahl der Änderungen, Zahl der Wächter-Punkte in PLAN.md, davon im
+Diff-Review abgehakt. Astra-Ersatz nur, wenn Oliver für diesen Lauf ein
+anderes Modell freigegeben hat. Vor dem Plan-Review: "Kritik: —".
 Fehlt die Zeile, rollt die neue Session die Einwände als neu wieder auf.
 
 Abgleich = der Wirklichkeits-Test. Eintragen, was beim Schnitt
@@ -155,7 +157,7 @@ erkaufte Erkenntnis aus dem Bauen. Fehlt sie, läuft die neue Session in dieselb
 Sackgasse, kippt eine getroffene Entscheidung oder vertraut einem blinden
 Wächter. Max 6 Zeilen, je ~85 Zeichen (Byte-Budget oben), Präfix mitschreiben:
 
-VERWORFEN:   Alternative/Sol-Vorschlag abgelehnt + Grund. Sol schlägt es sonst
+VERWORFEN:   Alternative/Worker-Vorschlag abgelehnt + Grund. Der Worker schlägt es sonst
              erneut vor und der neue Boss nimmt es arglos an.
 WIDERLEGT:   Plan- oder Doku-Annahme hat sich beim Bauen als falsch erwiesen.
 FALSCH-GRÜN: Prüfung grün ohne Aussagekraft (blinder Wächter) ODER rot ohne
@@ -176,29 +178,20 @@ Sind es mehr als 6: die schwächste streichen, nicht die neueste.
      Session sie als "neue Einwände" wieder auf. -->
 - <...>
 
-## Codex
+## Worker
 
 <!-- Ohne Session-UUID ist die Fix-Kette nach dem Schnitt nicht sicher fortsetzbar.
-     "Sol nie .git" heißt: der Boss committet je Etappe, Sol fasst .git nie an
-     (Windows index.lock). Beide Zeilen wörtlich übernehmen.
-     Hat eine Etappe per Worker-Wahl (S3) Kimi als Worker, kommt EINE Zeile dazu:
-         Worker: Kimi (E<n>) — resume nur via kimi-worker.sh (T8-Gate), sonst build
-     Die Kimi-Session-ID liegt im SKILL-Ordner (.kimi-session-<slug>.build),
-     nicht in .planning/ — ihr Fehlen dort ist keine Divergenz. -->
-Sandbox: Kritik read-only · Bau workspace-write (resume erbt, kein -s) · Sol nie .git
-Resume: <live|keine> · <UUID|-> · nie `resume --last` (Parallel-Sessions)
+     "Worker nie .git" heißt: der Boss committet je Etappe, der Worker hat
+     git-Schreibbefehle per --disallowedTools gesperrt. Beide Zeilen wörtlich übernehmen. -->
+Rechte: Kritik read-only-Toolset · Bau Edit/Write/Bash + git-Sperrliste · Worker nie .git
+Resume: <live|keine> · <UUID|-> · nie `--continue` (Parallel-Sessions)
 <!--
-UUID SOFORT nach dem ERSTEN codex exec dieses Laufs eintragen, nicht erst beim
-Schnitt — dann ist der exec-Output oft schon aus dem Kontext gefallen. Quelle:
-der exec-Output selbst oder der Dateiname unter
-~/.codex/sessions/JJJJ/MM/TT/rollout-*-<UUID>.jsonl.
-`--last` erwischt in diesem Projekt eine fremde Parallel-Sitzung. Sol-Etappen
-immer (globales -C VOR dem Subcommand — resume erbt das Arbeitsverzeichnis
-NICHT, danach die workdir:-Logzeile gegen das Zielrepo prüfen):
-    codex -C <repo> exec resume <UUID> "<delta>"
-Kimi-Etappen: kimi-worker.sh resume <slug> … — das T8-Gate im Worker
-entscheidet; blockt es (Exit 6), frischer build mit Delta + PLAN.md/STATE.md.
-Noch kein exec gefahren: "Resume: keine · -".
+Die UUID erzeugt der Boss VOR dem ersten Bau-Aufruf selbst und übergibt sie
+als --session-id — dann steht sie hier, bevor der Aufruf sterben kann.
+Resume immer aus dem Repo-Root, als einziger Befehl im Bash-Aufruf, mit
+--json-schema (sonst kein structured_output):
+    claude -p --resume <UUID> --model claude-opus-5-5 ... "<delta>"
+Noch kein Bau gefahren: "Resume: keine · -".
 -->
 
 ## Gates Oliver
@@ -210,4 +203,4 @@ Noch kein exec gefahren: "Resume: keine · -".
 
 <!-- EIN Imperativ + wörtlicher Befehl. Kein "man könnte", keine Optionen.
      Bei "Kante: ROT" steht hier der Fix, nicht die nächste Etappe. -->
-<Baue E6: codex exec resume <UUID> mit dem Delta aus PLAN.md, Abschnitt E6.>
+<Baue E6: claude -p --resume <UUID> mit dem Delta aus PLAN.md, Abschnitt E6.>

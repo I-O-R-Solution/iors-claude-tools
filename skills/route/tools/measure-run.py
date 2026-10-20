@@ -81,10 +81,13 @@ from datetime import datetime
 # "opus-4-8" trifft claude-opus-4-8).
 PREISE_JE_MODELL = {
     # Claude (Anthropic-Listenpreise; cache_read = 0,1x, cache_write = 1,25x input)
+    # "opus-5-5" MUSS vor "opus-5" stehen: "opus-5" traefe sonst auch claude-opus-5-5.
+    "opus-5-5":  {"input":  4.00, "output": 20.00, "cache_read": 0.200, "cache_write":  5.000},
+    "fable-5-1": {"input": 10.00, "output": 50.00, "cache_read": 0.250, "cache_write": 12.500},
     "fable-5":   {"input": 10.00, "output": 50.00, "cache_read": 1.000, "cache_write": 12.500},
     "opus-5":    {"input":  5.00, "output": 25.00, "cache_read": 0.500, "cache_write":  6.250},
     "opus-4-8":  {"input":  5.00, "output": 25.00, "cache_read": 0.500, "cache_write":  6.250},
-    "sonnet-5":  {"input":  3.00, "output": 15.00, "cache_read": 0.300, "cache_write":  3.750},
+    "sonnet-5":  {"input":  2.00, "output": 10.00, "cache_read": 0.200, "cache_write":  2.500},
     "haiku-4-5": {"input":  1.00, "output":  5.00, "cache_read": 0.100, "cache_write":  1.250},
     # Fremd-Worker (Stand 31.08.2026, benchlm.ai / Anbieter-Preisseiten).
     # kimi-k3: Cache-Saetze sind NICHT belegt - Claude-Ratio als konservative

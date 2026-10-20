@@ -121,3 +121,22 @@ Lauf-Zahl vergleicht, vergleicht zwei Preisbasen.
 - Prüftiefe richtet sich nach der Sichtbarkeit des Fehlers, nicht nach der Wichtigkeit des Laufs. Ein Prüfwerkzeug, das nur ein anderes Prüfwerkzeug absichert, braucht einen konkreten Kundenfehler als Anlass — sonst wächst die Absicherung schneller als das Produkt, und ein RISIKO-Lauf zieht Gestaltungsarbeit in eine Maschinerie, für die sie nie gedacht war. Oliver hat diesen Lauf genau dort gestoppt.
 - Ein Probenwerkzeug, das nicht zuerst am intakten Objekt grün gesehen wurde, meldet rot, ohne die Sache zu treffen. In diesem Lauf zweimal hintereinander gemessen: eine verdoppelte UTF-8-Signatur und ein Unix-Pfad an `ParseFile` — beide Male starb die Probe am Parser, nicht am geprüften Riegel. Der `green_first`, den der Bau-Prompt vom Worker verlangt, gilt für die eigenen Proben genauso.
 - Eine Suite, die beim ersten Fehlschlag abbricht, macht jede Probe blind für alles hinter dem ersten getroffenen Riegel. Eine Probe beweist nur den Riegel, den sie zuerst erreicht — wer einen bestimmten Riegel bezeugen will, braucht eine Mutation, die ausschließlich ihn treffen kann.
+
+## 2026-10-06 — wissens-luecken-gruppe1 (Abschluss-Sitzung: 8 Anfragen, Spitze 89k, Mittel 84k, 0,48 $, 1 Boss-Sitz; frühere Sitzungen ohne MESSUNG-Zeile)
+- Ein Zettel, der nach dem Commit nicht neu geschrieben wird, lügt beim nächsten /route („nichts committet" stand 32 Tage neben einem gemergten Commit). Invariante: jeder Commit eines Laufs schreibt im selben Zug die Kante-Zeile neu.
+- Ein Lauf, dessen einziger Rest ein menschliches Freigabe-Gate ist, wird ABGESCHLOSSEN mit dem Gate in der Übergabe — nicht offen gehalten; ein offener Zettel blockiert jedes folgende /route mit einer Abgleich-Runde.
+
+## 2026-10-06 — webinar-freitag (78 Anfragen, Spitze 221k, Mittel 146k, 5,52 $ Boss + 42,27 $ Worker/Kritik, 2 Boss-Sitze)
+- Eine Rechtsstand-Etappe, deren Webquellen der Worker selbst kopiert, ist erst belegt, wenn der Boss mindestens eine Kopie unabhängig neu abruft und Hash/Bytes vergleicht — sonst stammen Kopie und Zitat aus derselben Hand.
+- Ein Ausnahme-Selektor im Abwesenheits-Prädikat (hier: ganze data-fakt-Elemente) nimmt auch unbelegte Sätze im selben Element mit; was er ausnimmt, gehört namentlich in die PERZEPTIV-Lesung.
+- Bau-Etappen mit gemeinsamem Prüfskript-Satz in derselben Worker-Session fortsetzen (Resume) spart das erneute Einlesen von Plan und Faktenbasis; die Etappe davor ist trotzdem erst nach Boss-Stichprobe am Volltext freigegeben.
+
+## 2026-10-09 — videokurs-m3-v3 (124 Anfragen, Spitze 303k, Mittel 207k, 14,32 $ Boss + 52,30 $ Worker/Kritik, 2 Boss-Sitze)
+- Eine Worker-Session wird nur fortgesetzt, solange ihr gemessener Kontext plus die geschätzte Etappe deutlich unter dem Fenster bleibt; die Zahl steht im Envelope (`usage.iterations[-1].cache_read_input_tokens`). Hier lag E2 bei ~580k, E2b lief frisch mit vollem PLAN.md im Prompt und kam ohne Rückfrage durch.
+- Wer gesprochenen Text ändert, prüft jeden Wortanker auf das Wort, das aus dem Satz fällt: ein Anker-Resolver, der ab Szenenstart vorwärts sucht, wirft nicht, sondern springt still zum nächsten Vorkommen in einer späteren Szene. Nur ein Szenenfenster-Prädikat fängt das.
+- Zeitdaten nach einer Neu-Vertonung werden per Skript aus dem Alignment abgeleitet und von einem UNABHÄNGIG geschriebenen Prüfer zur Prüfzeit nachgerechnet — nie gegen die eigene Ausgabe verglichen.
+
+## 2026-10-11 — demofilm-skript (134 Anfragen, Spitze 271k, Mittel 136k, 14,45 $ Boss + 127,09 $ Worker/Kritik, 4 Boss-Sitze)
+- Streicht der Auftraggeber eine ganze Wortklasse (hier: Anwalt/Kanzlei/Stundensatz), wird sie Sperrwort mit Rot-Zeuge je Wort UND die Grenze, die sie trug, bekommt einen neuen Positivanker ohne diese Wörter — sonst verschwindet mit dem Wort die Rechtsgrenze (RDG) still mit.
+- Die Kosten einer fortgesetzten Worker-Session wachsen mit der Session, nicht mit dem Delta (Fix-Runden 23,73 → 30,83 → 42,37 $ bei kleiner werdendem Auftrag); vor jeder weiteren Resume-Runde abwägen, ob eine frische Session mit PLAN.md + Delta billiger ist.
+- Ein Sperrwort-Abnahmekriterium als rohes grep über die ganze Datei trifft Dateipfade und Doku-Abschnitte; Gate ist der auf Sprech-/Bildtext begrenzte Prüfer, das grep nur Stichprobe mit benannten erlaubten Abschnitten.

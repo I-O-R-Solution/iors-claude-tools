@@ -41,6 +41,10 @@
 # Exit: 0 = GRUEN, 1 = ROT, 2 = Aufruf-Fehler.
 # ---------------------------------------------------------------------------
 set -uo pipefail
+# Python-Ausgabe immer UTF-8 (12.10.2026): auf der Windows-Konsole crashte
+# print() an Zeichen wie `→` (cp1252), Check e) las dann LEER und meldete
+# "Naechster Schritt fehlt" - 3 von 10 roten Ampeln 06.-11.10. waren das.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
 SKILLDIR="C:/Users/User/.claude/skills/route"
 LIMIT=4096
@@ -143,7 +147,13 @@ PY
 )"
     if [ -z "$NAECHSTER" ]; then
       rot "'## Naechster Schritt' fehlt oder ist leer — die naechste Session haette keine Bruecke."
-    elif printf '%s' "$NAECHSTER" | grep -q "<[^>]*>"; then
+    # Platzhalter = spitze Klammern OHNE Leerzeichen direkt innen
+    # (<UUID>, <f>, <zwei Delta-Befunde>). Vorher `<[^>]*>`: das ueberspannte
+    # jede Umleitung `< prompt.md > out` und machte woertliche Worker-Befehle
+    # rot (3 von 10 Rot-Ampeln 06.-11.10.). Korpus 192 Zettel-Versionen:
+    # alle echten Platzhalter weiter rot, beide Umleitungen gruen.
+    # Gegenprobe: skills/route/tests/kante-naechster.test.sh
+    elif printf '%s' "$NAECHSTER" | grep -Eq '<[^<>[:space:]]([^<>]*[^<>[:space:]])?>'; then
       rot "'Naechster Schritt' traegt einen Platzhalter statt eines woertlichen Befehls: $NAECHSTER"
     fi
 
