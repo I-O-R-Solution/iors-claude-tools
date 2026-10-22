@@ -13,14 +13,12 @@ Shared [Claude Code](https://claude.com/claude-code) commands and skills for the
 | `/claudemd-optimize` | Reviews a `CLAUDE.md` against 9 principles (Cherny + Anthropic + Stulberg). Works on both levels: `global` argument reviews `~/.claude/CLAUDE.md`, a path argument reviews a project file. Returns a compact verdict with concrete actions, no auto-fix. Max 80 lines output. |
 | `/prepare-session` | Context-Engineer. Generates a copy-ready session prompt for a topic/feature with code context, gap analysis, guardrails. Saves to `.planning/session-prompts/`. |
 | `/prompt` | Turns a free, unsorted brain-dump into one commissioning prompt using Anthropic's four-block template (THE JOB / THE WHY / THE GUARDRAILS / DONE MEANS). Reads the repo and memory first, then asks at most five single questions — one per turn, only about gaps reading could not close. Runs eight greppable self-checks on the draft (no bare prohibitions, no ALL-CAPS emphasis, no self-verification instructions, a measurable exit criterion) and prints the prompt copy-ready in the chat. Self-contained; hands existing prompt files to `/prompt-audit` if you have it. |
-| `/ende` | Session-end protocol. Thin pointer to the `session-ende` skill (single source of truth). Use when you want a guaranteed slash-command trigger. |
 | `/spark` | Quality-First project bootstrap. Slash-trigger for the `spark` skill — pre-fills Phase 0 from any text passed after the command (project name, migration hint, or rich description). |
 
 ### Skills
 
 | Skill | Trigger | Purpose |
 |---|---|---|
-| `session-ende` | "Schluss" / "Ende" / "Feierabend" | Session-end protocol: memory check, chronicle check, distill check, open items, integrity check. **Not part of the starter package** — expects an existing memory setup under `~/.claude/` (`docs/memory-protocol.md`, `chronicle/`, `episodes/`, `hooks/wurzel-fruehwarnung.sh`, `/memory-audit`). Without those it runs into empty paths. Same for `/ende`, which only points at it. |
 | `spark` | "neues Projekt" / "scaffold" / "bootstrap" / "Grundgeruest" / "kick off" | Quality-First project bootstrap. Adaptive input (rich description OR 3-question fallback), Excellence-Anchor (3 sharpening questions), Craft-Principles as Decision-000 ADR, mandatory trio (CLAUDE.md/CONTEXT.md/REFERENCES.md) plus README/.gitignore/decisions/, conditional code-tooling skeleton (Python/Node-TS/Rust/Go), idempotent re-runs, auto-review via `/claudemd-optimize`. |
 | `route` | `/route` / "route this" / "run the route loop" | One-pass build loop across two model families: an Opus 5.5 boss session interviews and plans; GPT-6 Astra (Codex CLI) reviews the plan ONCE and improves it (or leaves it when good enough); a headless Opus 5.5 worker builds; Astra reviews the execution ONCE; the boss verifies with machine predicates and a full diff read, then commits. A short review circle, never a loop. **Not part of the starter package** — see [Installing `/route`](#installing-route) for requirements and hooks. |
 
@@ -92,8 +90,6 @@ Restart Claude Code, then start with `/einrichtung`.
 ```bash
 cp commands/check.md ~/.claude/commands/          # code review, self-contained
 cp commands/prompt.md ~/.claude/commands/         # brain-dump -> commissioning prompt, self-contained
-cp commands/ende.md  ~/.claude/commands/          # needs session-ende AND a memory setup
-cp -r skills/session-ende ~/.claude/skills/       # see the note in the skills table
 ```
 
 ## Usage
@@ -196,17 +192,16 @@ Then register two hooks in `~/.claude/settings.json` (merge into existing `hooks
 
 `state-byte-gate.sh` blocks a commit whose route `STATE.md` exceeds its 4096-byte budget; `zonen-melder.sh` announces context-zone changes during a run (fail-open). Self-tests: `bash hooks/state-byte-gate.test.sh` and `for t in skills/route/tests/*.sh; do bash "$t"; done`.
 
-### `/ende` and the `session-ende` skill
+### Session end and memory: merkwerk
 
-The skill is the single source of truth for the protocol. The slash-command is a thin pointer to it.
+The session-end protocol (`session-ende` skill, slash command) lives in [merkwerk](https://github.com/I-O-R-Solution/merkwerk), the memory engine for Claude Code. It ships the skill together with the memory setup it needs, so it is no longer kept here.
 
 ```bash
-/ende                             # explicit slash-command trigger
+claude plugin marketplace add I-O-R-Solution/merkwerk
+claude plugin install merkwerk@merkwerk
 ```
 
-Or trigger via natural language: "Schluss", "Ende", "Feierabend", "Feierabend fuer heute" etc. (full trigger list in `skills/session-ende/SKILL.md`).
-
-If the natural-language trigger ever fails to fire, fall back to `/ende`.
+Then run the one-time `install.sh` from the merkwerk README and restart Claude Code. The command is `/merkwerk:ende`; "Schluss", "Ende" or "Feierabend" trigger it as well.
 
 ## Conventions
 
